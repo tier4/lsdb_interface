@@ -1,0 +1,9 @@
+/**:
+  ros__parameters:
+    speed_scale_factor: 1.0 # [-] speed scale factor
+    turn_kP: 0.0
+    turn_kI: 0.0
+    turn_kD: 0.0
+    turn_errlim: 0.0
+    trapezoidal_accel: 2.0
+    trapezoidal_decel: 2.5

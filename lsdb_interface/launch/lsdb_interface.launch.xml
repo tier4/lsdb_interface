@@ -1,0 +1,67 @@
+<launch>
+  <arg name="mode" default="serial" description="options: can, serial"/>
+  <arg name="can_device" default="can0"/>
+  <arg name="roboteq_left_serial_port" default="/dev/ttyFixedLeft"/>
+  <arg name="roboteq_right_serial_port" default="/dev/ttyFixedRight"/>
+  <arg name="lsdb_left_serial_port" default="/dev/ttyS0"/>
+  <arg name="lsdb_right_serial_port" default="/dev/ttyS1"/>
+
+  <arg name="s1_left_command" default="/s1/left/command"/>
+  <arg name="s1_right_command" default="/s1/right/command"/>
+
+  <arg name="lsdb_serial_timeout_sec" default="0.5"/>
+
+  <arg name="vehicle_calibration_param_path" default="$(find-pkg-share lsdb_interface)/config/vehicle_calibration.param.yaml"/>
+
+  <!-- Global parameters -->
+  <!-- Do not add "group" in order to propagate global parameters -->
+  <include file="$(find-pkg-share global_parameter_loader)/launch/global_params.launch.py">
+    <arg name="vehicle_model" value="crow"/>
+  </include>
+
+  <group>
+    <push-ros-namespace namespace="s1"/>
+
+    <!-- serial interface -->
+    <group if="$(eval &quot;'$(var mode)'=='serial'&quot;)">
+      <group>
+        <push-ros-namespace namespace="lsdb/left"/>
+        <include file="$(find-pkg-share lsdb_serial_interface)/launch/lsdb_serial_interface.launch.xml">
+          <arg name="serial_port" value="$(var lsdb_left_serial_port)"/>
+          <arg name="input_command" value="$(var s1_left_command)"/>
+          <arg name="vehicle_calibration_param_path" value="$(var vehicle_calibration_param_path)"/>
+          <arg name="lsdb_serial_timeout_sec" value="$(var lsdb_serial_timeout_sec)"/>
+          <arg name="trapezoidal_accel" value="4.0"/>
+          <arg name="trapezoidal_decel" value="4.0"/>
+        </include>
+      </group>
+
+      <group>
+        <push-ros-namespace namespace="lsdb/right"/>
+        <include file="$(find-pkg-share lsdb_serial_interface)/launch/lsdb_serial_interface.launch.xml">
+          <arg name="serial_port" value="$(var lsdb_right_serial_port)"/>
+          <arg name="input_command" value="$(var s1_right_command)"/>
+          <arg name="vehicle_calibration_param_path" value="$(var vehicle_calibration_param_path)"/>
+          <arg name="lsdb_serial_timeout_sec" value="$(var lsdb_serial_timeout_sec)"/>
+          <arg name="trapezoidal_accel" value="4.0"/>
+          <arg name="trapezoidal_decel" value="4.0"/>
+        </include>
+      </group>
+    </group>
+
+    <!-- autoware interface -->
+    <arg name="loop_rate" default="50.0"/>
+    <arg name="control_cmd_timeout_sec" default="0.5"/>
+    <node pkg="lsdb_interface" name="lsdb_interface" exec="lsdb_interface" output="log">
+      <param name="loop_rate" value="$(var loop_rate)"/>
+      <param name="control_cmd_timeout_sec" value="$(var control_cmd_timeout_sec)"/>
+      <remap from="~/input/lsdb/left/status" to="lsdb/left/status"/>
+      <remap from="~/input/lsdb/left/motor_status" to="lsdb/left/motor_status"/>
+      <remap from="~/input/lsdb/right/status" to="lsdb/right/status"/>
+      <remap from="~/input/lsdb/right/motor_status" to="lsdb/right/motor_status"/>
+      <remap from="~/output/left/command" to="$(var s1_left_command)"/>
+      <remap from="~/output/right/command" to="$(var s1_right_command)"/>
+      <param from="$(var vehicle_calibration_param_path)"/>
+    </node>
+  </group>
+</launch>

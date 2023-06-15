@@ -1,0 +1,22 @@
+<launch>
+  <arg name="serial_port" default="/dev/ttyS0"/>
+  <arg name="input_command" default="command"/>
+  <arg name="lsdb_serial_timeout_sec" default="0.5"/>
+  <arg name="vehicle_calibration_param_path" default="$(find-pkg-share roboteq_interface)/config/vehicle_calibration.param.yaml"/>
+  <arg name="trapezoidal_accel" default="2.0"/>
+  <arg name="trapezoidal_decel" default="2.0"/>
+  <arg name="loop_rate_hz" default="50.0"/>
+
+  <node pkg="lsdb_serial_interface" name="lsdb_serial_interface" exec="lsdb_serial_interface" output="log">
+    <remap from="~/input/command" to="$(var input_command)"/>
+    <remap from="~/output/status" to="status"/>
+    <remap from="~/output/motor_status" to="motor_status"/>
+    <remap from="~/output/debug/status" to="debug_status"/>
+    <param name="serial_port" value="$(var serial_port)"/>
+    <param name="lsdb_serial_timeout_sec" value="$(var lsdb_serial_timeout_sec)"/>
+    <param from="$(var vehicle_calibration_param_path)"/>
+    <param name="trapezoidal_accel" value="$(var trapezoidal_accel)"/>
+    <param name="trapezoidal_decel" value="$(var trapezoidal_decel)"/>
+    <param name="loop_rate_hz" value="$(var loop_rate_hz)"/>
+  </node>
+</launch>
