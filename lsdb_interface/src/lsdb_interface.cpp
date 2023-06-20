@@ -109,27 +109,27 @@ void LsdbInterface::onTimer()
 
 void LsdbInterface::publishZeroCommand()
 {
-  using lsdb_msgs::msg::DigitalOutCommand;
+  // using lsdb_msgs::msg::DigitalOutCommand;
   s1_right_cmd_.stamp = this->now();
   s1_left_cmd_.stamp = this->now();
   s1_left_cmd_.command.speed = 0.0;
   s1_right_cmd_.command.speed = 0.0;
-  s1_right_cmd_.command.digital_output.data.at(0) = DigitalOutCommand::LOW;
-  s1_left_cmd_.command.digital_output.data.at(0) = DigitalOutCommand::LOW;
+  // s1_right_cmd_.command.digital_output.data.at(0) = DigitalOutCommand::LOW;
+  // s1_left_cmd_.command.digital_output.data.at(0) = DigitalOutCommand::LOW;
   s1_cmd_right_pub_->publish(s1_right_cmd_);
   s1_cmd_left_pub_->publish(s1_left_cmd_);
 }
 
 void LsdbInterface::publishCommand()
 {
-  using lsdb_msgs::msg::DigitalOutCommand;
-  if (s1_right_cmd_.command.speed < FLT_EPSILON && s1_left_cmd_.command.speed < FLT_EPSILON) {
-    s1_right_cmd_.command.digital_output.data.at(0) = DigitalOutCommand::HIGH;
-    s1_left_cmd_.command.digital_output.data.at(0) = DigitalOutCommand::HIGH;
-  } else {
-    s1_right_cmd_.command.digital_output.data.at(0) = DigitalOutCommand::LOW;
-    s1_left_cmd_.command.digital_output.data.at(0) = DigitalOutCommand::LOW;
-  }
+  // using lsdb_msgs::msg::DigitalOutCommand;
+  // if (s1_right_cmd_.command.speed < FLT_EPSILON && s1_left_cmd_.command.speed < FLT_EPSILON) {
+  //   s1_right_cmd_.command.digital_output.data.at(0) = DigitalOutCommand::HIGH;
+  //   s1_left_cmd_.command.digital_output.data.at(0) = DigitalOutCommand::HIGH;
+  // } else {
+  //   s1_right_cmd_.command.digital_output.data.at(0) = DigitalOutCommand::LOW;
+  //   s1_left_cmd_.command.digital_output.data.at(0) = DigitalOutCommand::LOW;
+  // }
 
   s1_cmd_right_pub_->publish(s1_right_cmd_);
   s1_cmd_left_pub_->publish(s1_left_cmd_);
