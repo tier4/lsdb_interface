@@ -1,22 +1,22 @@
-# ROBOTEQ SERIAL INTERFACE
+# LSDB SERIAL INTERFACE
 
 ## Input / Output
 
 ### Input Topics
 
-From roboteq_interface
+From lsdb_interface
 
 | Name            | Type                                   | Description    |
 | :-------------- | :------------------------------------- | :------------- |
-| ~/input/command | roboteq_msgs/msg/RoboteqCommandStamped | input commands |
+| ~/input/command | lsdb_msgs/msg/LsdbCommandStamped | input commands |
 
 ### Output Topics
 
-To roboteq_interface
+To lsdb_interface
 
 | Name            | Type                                  | Description   |
 | :-------------- | :------------------------------------ | :------------ |
-| ~/output/status | roboteq_msgs/msg/RoboteqStatusStamped | output status |
+| ~/output/status | lsdb_msgs/msg/LsdbStatusStamped | output status |
 
 ## ROS Parameter
 

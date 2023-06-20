@@ -1,4 +1,4 @@
-# ROBOTEQ_INTERFACE
+# LSDB_INTERFACE
 
 ## Input / Output
 
@@ -14,12 +14,12 @@
 | /control/command/hazard_lights_cmd   | autoware_auto_vehicle_msgs/msg/HazardLightsCommand     | hazard lights command                    |
 | /control/command/emergency_cmd       | tier4_vehicle_msgs/msg/VehicleEmergencyStamped         | emergency command                        |
 
-- From roboteq_serial_interface
+- From lsdb_serial_interface
 
 | Name                  | Type                                  | Description                                |
 | :-------------------- | :------------------------------------ | :----------------------------------------- |
-| /roboteq/left/status  | roboteq_msgs/msg/RoboteqStatusStamped | current status from left motor controller  |
-| /roboteq/right/status | roboteq_msgs/msg/RoboteqStatusStamped | current status from right motor controller |
+| /lsdb/left/status  | lsdb_msgs/msg/LsdbStatusStamped | current status from left motor controller  |
+| /lsdb/right/status | lsdb_msgs/msg/LsdbStatusStamped | current status from right motor controller |
 
 ---
 
@@ -39,12 +39,12 @@
 | /vehicle/status/steering_wheel_deg     | tier4_debug_msgs/msg/Float32Stamped                 | steering wheel angle [deg] |
 | /vehicle/status/battery_charge         | tier4_vehicle_msgs/msg/BatteryStatus                | **NOT IMPLEMENTED**        |
 
-- To roboteq_serial_interface
+- To lsdb_serial_interface
 
 | Name                   | Type                                   | Description                       |
 | :--------------------- | :------------------------------------- | :-------------------------------- |
-| /roboteq/left/command  | roboteq_msgs/msg/RoboteqCommandStamped | command to left motor controller  |
-| /roboteq/right/command | roboteq_msgs/msg/RoboteqCommandStamped | command to right motor controller |
+| /lsdb/left/command  | lsdb_msgs/msg/LsdbCommandStamped | command to left motor controller  |
+| /lsdb/right/command | lsdb_msgs/msg/LsdbCommandStamped | command to right motor controller |
 
 ## ROS Parameters
 
@@ -52,4 +52,4 @@
 | :------------------------- | :----- | :--------------------------------- | :------ |
 | loop_rate                  | double | loop rate to publish commands [Hz] | 50.0    |
 | control_cmd_timeout_sec    | double | control_cmd time out [sec]         | 1.0     |
-| roboteq_status_timeout_sec | double | roboteq_status time out [sec]      | 0.5     |
+| lsdb_status_timeout_sec | double | lsdb_status time out [sec]      | 0.5     |
