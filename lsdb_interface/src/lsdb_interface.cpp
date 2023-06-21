@@ -55,7 +55,7 @@ LsdbInterface::LsdbInterface(const rclcpp::NodeOptions & node_options)
     "~/input/lsdb/right/status", 1, std::bind(&LsdbInterface::onLsdbRightStatus, this, _1));
   // Subscribe from AVA-3510 Din
   din0_estop_sub_ = this->create_subscription<dio_ros_driver::msg::DIOPort>(
-    "/dio/din/0", 1, std::bind(&LsdbInterface::onDin0Estop, this, _1));
+    "/dio/din0", 1, std::bind(&LsdbInterface::onDin0Estop, this, _1));
 
   // Publish to autoware
   velocity_status_pub_ = this->create_publisher<autoware_auto_vehicle_msgs::msg::VelocityReport>(
@@ -85,10 +85,10 @@ LsdbInterface::LsdbInterface(const rclcpp::NodeOptions & node_options)
   s1_cmd_right_pub_ =
     this->create_publisher<lsdb_msgs::msg::LsdbCommandStamped>("~/output/right/command", 1);
   // Publish to AVA-3510 Dout
-  dout0_brake_light_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout/0", 1);
-  dout1_front_light_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout/1", 1);
-  dout2_right_blinker_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout/2", 1);
-  dout3_left_blinker_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout/3", 1);
+  dout0_brake_light_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout0", 1);
+  dout1_front_light_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout1", 1);
+  dout2_right_blinker_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout2", 1);
+  dout3_left_blinker_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout3", 1);
 
   // setupDiagnosticUpdater();
 
