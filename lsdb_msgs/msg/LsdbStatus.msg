@@ -1,0 +1,6 @@
+float32 motor_speed_rpm
+
+int32 init_status
+bool emergency_stop
+lsdb_msgs/ControlWord control_word
+lsdb_msgs/DriverErrCode driver_err_code
