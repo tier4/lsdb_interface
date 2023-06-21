@@ -106,7 +106,7 @@ private:
   rclcpp::Subscription<std_msgs::msg::Int8>::SharedPtr right_motor_status_sub_;
   rclcpp::Subscription<std_msgs::msg::Int8>::SharedPtr left_motor_status_sub_;
   // Subscribe from AVA-3510 Din
-  rclcpp::Subscription<dio_ros_driver::msg::DIOPort>::SharedPtr din0_estop_sub_;
+  // rclcpp::Subscription<dio_ros_driver::msg::DIOPort> din0_estop_sub_;
 
   // Publish to s1
   rclcpp::Publisher<lsdb_msgs::msg::LsdbCommandStamped>::SharedPtr s1_cmd_right_pub_;

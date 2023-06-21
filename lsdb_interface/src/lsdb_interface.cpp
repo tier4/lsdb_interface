@@ -54,8 +54,8 @@ LsdbInterface::LsdbInterface(const rclcpp::NodeOptions & node_options)
   lsdb_right_status_sub_ = this->create_subscription<lsdb_msgs::msg::LsdbStatusStamped>(
     "~/input/lsdb/right/status", 1, std::bind(&LsdbInterface::onLsdbRightStatus, this, _1));
   // Subscribe from AVA-3510 Din
-  din0_estop_sub_ = this->create_subscription<dio_ros_driver::msg::DIOPort>(
-    "/dio/din0", 1, std::bind(&LsdbInterface::onDin0Estop, this, _1));
+  // din0_estop_sub_ = this->create_subscription<dio_ros_driver::msg::DIOPort>(
+  //   "/dio/din0", 1, std::bind(&LsdbInterface::onDin0Estop, this, _1));
 
   // Publish to autoware
   velocity_status_pub_ = this->create_publisher<autoware_auto_vehicle_msgs::msg::VelocityReport>(
@@ -373,7 +373,7 @@ void LsdbInterface::onLsdbRightStatus(
   lsdb_right_status_ptr_ = msg;
 }
 
-// void LsdbInterface::onDin0Estop(const dio_ros_driver::msg::DIOPort::ConstSharedPtr msg)
+// void LsdbInterface::onDin0Estop(const dio_ros_driver::msg::DIOPort msg)
 // {
 // }
 
