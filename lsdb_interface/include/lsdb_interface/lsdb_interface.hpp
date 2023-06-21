@@ -43,7 +43,6 @@ class LsdbInterface : public rclcpp::Node
 {
 public:
   explicit LsdbInterface(const rclcpp::NodeOptions & node_options);
-  ~LsdbInterface();
 
 private:
   double wheel_base_;

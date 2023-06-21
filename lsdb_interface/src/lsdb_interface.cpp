@@ -102,12 +102,6 @@ LsdbInterface::LsdbInterface(const rclcpp::NodeOptions & node_options)
     this, this->get_clock(), period_ns, std::bind(&LsdbInterface::onTimer, this));
 }
 
-LsdbInterface::~LsdbInterface()
-{
-  dout1_msg_.value = false;
-  dout1_front_light_pub_->publish(dout1_msg_);
-}
-
 void LsdbInterface::onTimer()
 {
   // diagnostic_updater_.force_update();
