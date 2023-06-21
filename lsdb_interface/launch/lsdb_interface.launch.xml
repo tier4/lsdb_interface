@@ -62,6 +62,7 @@
       <remap from="~/output/left/command" to="$(var s1_left_command)"/>
       <remap from="~/output/right/command" to="$(var s1_right_command)"/>
       <param from="$(var vehicle_calibration_param_path)"/>
+      <param name="front_light_initial_state" value="false"/>
     </node>
   </group>
 </launch>
