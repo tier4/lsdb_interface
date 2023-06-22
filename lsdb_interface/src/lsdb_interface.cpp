@@ -185,39 +185,6 @@ void LsdbInterface::publishVelocityAndSteering(
   steering_wheel_deg_status_pub_->publish(steer_wheel_deg_msg);
 }
 
-// void LsdbInterface::publishTurnIndicator(                          // Turn indicator report
-//   lsdb_msgs::msg::RoboteqStatusStamped::ConstSharedPtr left_msg,
-//   lsdb_msgs::msg::RoboteqStatusStamped::ConstSharedPtr right_msg)
-// {
-//   using autoware_auto_vehicle_msgs::msg::HazardLightsReport;
-//   using autoware_auto_vehicle_msgs::msg::TurnIndicatorsReport;
-
-//   auto hazard_report_msg = HazardLightsReport{};
-//   hazard_report_msg.stamp = this->now();
-//   auto turn_indicator_report_msg = TurnIndicatorsReport{};
-//   turn_indicator_report_msg.stamp = this->now();
-
-//   const auto & left_digital_output = left_msg->status.digital_output;
-//   const auto & right_digital_output = right_msg->status.digital_output;
-
-//   if (left_digital_output.at(1) == 0 && right_digital_output.at(1) == 0) {
-//     turn_indicator_report_msg.report = TurnIndicatorsReport::DISABLE;
-//     hazard_report_msg.report = HazardLightsReport::DISABLE;
-//   } else if (left_digital_output.at(1) == 1 && right_digital_output.at(1) == 0) {
-//     turn_indicator_report_msg.report = TurnIndicatorsReport::ENABLE_LEFT;
-//     hazard_report_msg.report = HazardLightsReport::DISABLE;
-//   } else if (left_digital_output.at(1) == 0 && right_digital_output.at(1) == 1) {
-//     turn_indicator_report_msg.report = TurnIndicatorsReport::ENABLE_RIGHT;
-//     hazard_report_msg.report = HazardLightsReport::DISABLE;
-//   } else if (left_digital_output.at(1) == 1 && right_digital_output.at(1) == 1) {
-//     turn_indicator_report_msg.report = TurnIndicatorsReport::DISABLE;
-//     hazard_report_msg.report = HazardLightsReport::ENABLE;
-//   }
-
-//   turn_indicators_status_pub_->publish(turn_indicator_report_msg);
-//   hazard_lights_status_pub_->publish(hazard_report_msg);
-// }
-
 void LsdbInterface::onAckermannControlCmd(
   const autoware_auto_control_msgs::msg::AckermannControlCommand::ConstSharedPtr msg)
 {
@@ -251,7 +218,14 @@ void LsdbInterface::onTurnIndicatorsCmd(                                        
   const autoware_auto_vehicle_msgs::msg::TurnIndicatorsCommand::ConstSharedPtr msg)
 {
   using autoware_auto_vehicle_msgs::msg::HazardLightsCommand;
+  using autoware_auto_vehicle_msgs::msg::HazardLightsReport;
   using autoware_auto_vehicle_msgs::msg::TurnIndicatorsCommand;
+  using autoware_auto_vehicle_msgs::msg::TurnIndicatorsReport;
+
+  auto hazard_report_msg = HazardLightsReport{};
+  hazard_report_msg.stamp = this->now();
+  auto turn_indicator_report_msg = TurnIndicatorsReport{};
+  turn_indicator_report_msg.stamp = this->now();
 
   dio_ros_driver::msg::DIOPort dio2_msg, dio3_msg;
 
@@ -261,23 +235,29 @@ void LsdbInterface::onTurnIndicatorsCmd(                                        
   }
 
   if (hazard_light_cmd_ptr_->command == HazardLightsCommand::ENABLE) {
+    hazard_report_msg.report = HazardLightsReport::ENABLE;
     dio2_msg.value = false;
     dio3_msg.value = false;
   } else {
+    turn_indicator_report_msg.report = TurnIndicatorsReport::DISABLE;
     switch (msg->command) {
       case TurnIndicatorsCommand::NO_COMMAND:
+        turn_indicator_report_msg.report = TurnIndicatorsReport::DISABLE;
         dio2_msg.value = true;
         dio3_msg.value = true;
         break;
       case TurnIndicatorsCommand::DISABLE:
+        turn_indicator_report_msg.report = TurnIndicatorsReport::DISABLE;
         dio2_msg.value = true;
         dio3_msg.value = true;
         break;
       case TurnIndicatorsCommand::ENABLE_LEFT:
+        turn_indicator_report_msg.report = TurnIndicatorsReport::ENABLE_LEFT;
         dio2_msg.value = true;
         dio3_msg.value = false;
         break;
       case TurnIndicatorsCommand::ENABLE_RIGHT:
+        turn_indicator_report_msg.report = TurnIndicatorsReport::ENABLE_RIGHT;
         dio2_msg.value = false;
         dio3_msg.value = true;
         break;
@@ -288,6 +268,8 @@ void LsdbInterface::onTurnIndicatorsCmd(                                        
     }
   }
 
+  turn_indicators_status_pub_->publish(turn_indicator_report_msg);
+  hazard_lights_status_pub_->publish(hazard_report_msg);
   dout2_right_blinker_pub_->publish(dio2_msg);
   dout3_left_blinker_pub_->publish(dio3_msg);
 }
