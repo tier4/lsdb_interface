@@ -112,7 +112,7 @@ void LsdbInterface::onTimer()
 void LsdbInterface::publishZeroCommand()
 {
   dio_ros_driver::msg::DIOPort dout0_msg;
-  dout0_msg.value = true;
+  dout0_msg.value = false;
   dout0_brake_light_pub_->publish(dout0_msg);
 
   s1_right_cmd_.stamp = this->now();
@@ -127,10 +127,10 @@ void LsdbInterface::publishCommand()
 {
   dio_ros_driver::msg::DIOPort dout0_msg;
   if (s1_right_cmd_.command.speed < FLT_EPSILON && s1_left_cmd_.command.speed < FLT_EPSILON) {
-    dout0_msg.value = true;
+    dout0_msg.value = false;
     dout0_brake_light_pub_->publish(dout0_msg);
   } else {
-    dout0_msg.value = false;
+    dout0_msg.value = true;
     dout0_brake_light_pub_->publish(dout0_msg);
   }
 
@@ -261,25 +261,25 @@ void LsdbInterface::onTurnIndicatorsCmd(                                        
   }
 
   if (hazard_light_cmd_ptr_->command == HazardLightsCommand::ENABLE) {
-    dio2_msg.value = true;
-    dio3_msg.value = true;
+    dio2_msg.value = false;
+    dio3_msg.value = false;
   } else {
     switch (msg->command) {
       case TurnIndicatorsCommand::NO_COMMAND:
-        dio2_msg.value = false;
-        dio3_msg.value = false;
-        break;
-      case TurnIndicatorsCommand::DISABLE:
-        dio2_msg.value = false;
-        dio3_msg.value = false;
-        break;
-      case TurnIndicatorsCommand::ENABLE_LEFT:
-        dio2_msg.value = false;
+        dio2_msg.value = true;
         dio3_msg.value = true;
         break;
-      case TurnIndicatorsCommand::ENABLE_RIGHT:
+      case TurnIndicatorsCommand::DISABLE:
+        dio2_msg.value = true;
+        dio3_msg.value = true;
+        break;
+      case TurnIndicatorsCommand::ENABLE_LEFT:
         dio2_msg.value = true;
         dio3_msg.value = false;
+        break;
+      case TurnIndicatorsCommand::ENABLE_RIGHT:
+        dio2_msg.value = false;
+        dio3_msg.value = true;
         break;
       default:
         RCLCPP_ERROR_THROTTLE(
