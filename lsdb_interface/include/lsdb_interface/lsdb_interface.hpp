@@ -54,6 +54,7 @@ private:
   bool is_emergency_{false};
   rclcpp::Time prev_control_cmd_stamp_{0, 0, RCL_ROS_TIME};
   bool is_control_command_timeout_;
+  bool estop_button_status_{false};
 
   lsdb_msgs::msg::LsdbCommandStamped s1_right_cmd_, s1_left_cmd_;
   lsdb_msgs::msg::LsdbStatusStamped::ConstSharedPtr lsdb_right_status_ptr_,
@@ -84,7 +85,6 @@ private:
   void publishVelocityAndSteering(
     lsdb_msgs::msg::LsdbStatusStamped::ConstSharedPtr left_msg,
     lsdb_msgs::msg::LsdbStatusStamped::ConstSharedPtr right_msg);
-  void publishTurnIndicator(); // AVA-3510 DIO
 
   // Diagnostics
   // void setupDiagnosticUpdater(); Chage to LSDB Diag
@@ -105,7 +105,7 @@ private:
   rclcpp::Subscription<std_msgs::msg::Int8>::SharedPtr right_motor_status_sub_;
   rclcpp::Subscription<std_msgs::msg::Int8>::SharedPtr left_motor_status_sub_;
   // Subscribe from AVA-3510 Din
-  // rclcpp::Subscription<dio_ros_driver::msg::DIOPort> din0_estop_sub_;
+  rclcpp::Subscription<dio_ros_driver::msg::DIOPort>::SharedPtr din0_estop_sub_;
 
   // Publish to s1
   rclcpp::Publisher<lsdb_msgs::msg::LsdbCommandStamped>::SharedPtr s1_cmd_right_pub_;
