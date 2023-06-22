@@ -29,7 +29,6 @@ LsdbInterface::LsdbInterface(const rclcpp::NodeOptions & node_options)
   speed_scale_factor_ = declare_parameter<double>("speed_scale_factor", 1.0);
   loop_rate_ = declare_parameter<double>("loop_rate", 50.0);
   control_cmd_timeout_sec_ = declare_parameter<double>("control_cmd_timeout_sec", 1.0);
-  front_light_initial_state_ = declare_parameter<bool>("front_light_initial_state", false);
 
   // Subscribe from Autoware
   control_cmd_sub_ =
@@ -91,10 +90,6 @@ LsdbInterface::LsdbInterface(const rclcpp::NodeOptions & node_options)
   dout3_left_blinker_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout3", 1);
 
   // setupDiagnosticUpdater();
-
-  // set front light
-  dout1_msg_.value = front_light_initial_state_;
-  dout1_front_light_pub_->publish(dout1_msg_);
 
   // Timer
   const auto period_ns = rclcpp::Rate(loop_rate_).period();

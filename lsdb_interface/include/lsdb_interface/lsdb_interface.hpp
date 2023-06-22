@@ -54,7 +54,6 @@ private:
   bool is_emergency_{false};
   rclcpp::Time prev_control_cmd_stamp_{0, 0, RCL_ROS_TIME};
   bool is_control_command_timeout_;
-  bool front_light_initial_state_;
 
   lsdb_msgs::msg::LsdbCommandStamped s1_right_cmd_, s1_left_cmd_;
   lsdb_msgs::msg::LsdbStatusStamped::ConstSharedPtr lsdb_right_status_ptr_,
