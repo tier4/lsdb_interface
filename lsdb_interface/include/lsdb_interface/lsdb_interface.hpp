@@ -88,23 +88,23 @@ private:
 
   // Diagnostics
   void setupDiagnosticUpdater();
-  void checkInternalErr(diagnostic_updater::DiagnosticStatusWrapper & stat);
-  void checkEncoderABZSignalErr(diagnostic_updater::DiagnosticStatusWrapper & stat);
-  void checkEncoderUVWSignalErr(diagnostic_updater::DiagnosticStatusWrapper & stat);
-  void checkEncoderCountingErr(diagnostic_updater::DiagnosticStatusWrapper & stat);
-  void checkDriverTempHigh(diagnostic_updater::DiagnosticStatusWrapper & stat);
-  void checkDriverBusVoltageHigh(diagnostic_updater::DiagnosticStatusWrapper & stat);
-  void checkDriverBusVoltageLow(diagnostic_updater::DiagnosticStatusWrapper & stat);
-  void checkDriverOutputShortCircuit(diagnostic_updater::DiagnosticStatusWrapper & stat);
-  void checkBrakingResistorTempHigh(diagnostic_updater::DiagnosticStatusWrapper & stat);
-  void checkFollowingErrOverRange(diagnostic_updater::DiagnosticStatusWrapper & stat);
-  void checkOverload(diagnostic_updater::DiagnosticStatusWrapper & stat);
-  void checkSpeedFolowingErrOverRange(diagnostic_updater::DiagnosticStatusWrapper & stat);
-  void checkMotorTempHigh(diagnostic_updater::DiagnosticStatusWrapper & stat);
-  void checkSearchingMotorFailed(diagnostic_updater::DiagnosticStatusWrapper & stat);
-  void checkCommunicationFailed(diagnostic_updater::DiagnosticStatusWrapper & stat);
-  diagnostic_updater::Updater diagnostic_updater_{this};
   void checkDriverErrCode(const int bit_number, diagnostic_updater::DiagnosticStatusWrapper & stat);
+  void checkInternalErr(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(0, stat);};
+  void checkEncoderABZSignalErr(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(1, stat);};
+  void checkEncoderUVWSignalErr(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(2, stat);};
+  void checkEncoderCountingErr(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(3, stat);};
+  void checkDriverTempHigh(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(4, stat);};
+  void checkDriverBusVoltageHigh(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(5, stat);};
+  void checkDriverBusVoltageLow(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(6, stat);};
+  void checkDriverOutputShortCircuit(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(7, stat);};
+  void checkBrakingResistorTempHigh(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(8, stat);};
+  void checkFollowingErrOverRange(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(9, stat);};
+  void checkOverload(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(11, stat);};
+  void checkSpeedFolowingErrOverRange(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(12, stat);};
+  void checkMotorTempHigh(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(13, stat);};
+  void checkSearchingMotorFailed(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(14, stat);};
+  void checkCommunicationFailed(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(15, stat);};
+  diagnostic_updater::Updater diagnostic_updater_{this};
   std::map<int, std::string> error_code_map_{
     {0, "Internal error"},
     {1, "Encoder ABZ signal error"},
