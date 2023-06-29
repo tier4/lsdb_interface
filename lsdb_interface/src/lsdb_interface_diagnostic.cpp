@@ -84,7 +84,7 @@ void LsdbInterface::checkDriverErrCode(const int bit_number, diagnostic_updater:
   }
 
   if (level == DiagnosticStatus::ERROR) {
-    summary_msg = error_code_map_.at(bit_number) + ": " + additional_msg;
+    summary_msg = additional_msg + ": " + "Bit" + std::to_string(bit_number) + ": " + error_code_map_[bit_number];
   }
   stat.summary(level, summary_msg);
 
