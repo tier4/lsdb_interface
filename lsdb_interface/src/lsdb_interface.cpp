@@ -89,7 +89,7 @@ LsdbInterface::LsdbInterface(const rclcpp::NodeOptions & node_options)
   dout2_right_blinker_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout2", 1);
   dout3_left_blinker_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout3", 1);
 
-  // setupDiagnosticUpdater();
+  setupDiagnosticUpdater();
 
   // Timer
   const auto period_ns = rclcpp::Rate(loop_rate_).period();
@@ -99,7 +99,7 @@ LsdbInterface::LsdbInterface(const rclcpp::NodeOptions & node_options)
 
 void LsdbInterface::onTimer()
 {
-  // diagnostic_updater_.force_update();
+  diagnostic_updater_.force_update();
 
   publishVehicleControlMode();
   if (is_control_command_timeout_) {

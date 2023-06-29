@@ -87,8 +87,42 @@ private:
     lsdb_msgs::msg::LsdbStatusStamped::ConstSharedPtr right_msg);
 
   // Diagnostics
-  // void setupDiagnosticUpdater(); Chage to LSDB Diag
-  // diagnostic_updater::Updater diagnostic_updater_{this};
+  void setupDiagnosticUpdater();
+  void checkDriverErrCode(const int bit_number, diagnostic_updater::DiagnosticStatusWrapper & stat);
+  void checkInternalErr(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(0, stat);};
+  void checkEncoderABZSignalErr(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(1, stat);};
+  void checkEncoderUVWSignalErr(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(2, stat);};
+  void checkEncoderCountingErr(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(3, stat);};
+  void checkDriverTempHigh(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(4, stat);};
+  void checkDriverBusVoltageHigh(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(5, stat);};
+  void checkDriverBusVoltageLow(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(6, stat);};
+  void checkDriverOutputShortCircuit(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(7, stat);};
+  void checkBrakingResistorTempHigh(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(8, stat);};
+  void checkFollowingErrOverRange(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(9, stat);};
+  void checkOverload(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(11, stat);};
+  void checkSpeedFolowingErrOverRange(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(12, stat);};
+  void checkMotorTempHigh(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(13, stat);};
+  void checkSearchingMotorFailed(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(14, stat);};
+  void checkCommunicationFailed(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(15, stat);};
+  diagnostic_updater::Updater diagnostic_updater_{this};
+  std::map<int, std::string> error_code_map_{
+    {0, "Internal error"},
+    {1, "Encoder ABZ signal error"},
+    {2, "Encoder UVW signal error"},
+    {3, "Encoder counting error"},
+    {4, "Driver temperature too high"},
+    {5, "Driver bus voltage too high"},
+    {6, "Driver bus voltage too low"},
+    {7, "Driver output short-circuit"},
+    {8, "Braking resistor temperature too high"},
+    {9, "Following error over-range"},
+    {10, "Reserved"},
+    {11, "I²T error(Overload)"},
+    {12, "Speed following error over-range"},
+    {13, "Motor temperature too high"},
+    {14, "Searching motor failed(Communication encoder)"},
+    {15, "Communication failed"}
+  };
 
   // Subscribe from Autoware
   rclcpp::Subscription<autoware_auto_control_msgs::msg::AckermannControlCommand>::SharedPtr
