@@ -13,6 +13,7 @@
   <depend>autoware_auto_vehicle_msgs</depend>
   <depend>diagnostic_msgs</depend>
   <depend>diagnostic_updater</depend>
+  <depend>dio_ros_driver</depend>
   <depend>geometry_msgs</depend>
   <depend>message_filters</depend>
   <depend>rclcpp</depend>

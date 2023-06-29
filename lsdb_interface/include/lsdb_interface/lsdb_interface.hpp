@@ -29,6 +29,7 @@
 #include "autoware_auto_vehicle_msgs/msg/turn_indicators_command.hpp"
 #include "autoware_auto_vehicle_msgs/msg/turn_indicators_report.hpp"
 #include "autoware_auto_vehicle_msgs/msg/velocity_report.hpp"
+#include "dio_ros_driver/msg/dio_port.hpp"
 #include "geometry_msgs/msg/twist_stamped.hpp"
 #include "lsdb_msgs/msg/lsdb_status_stamped.hpp"
 #include "lsdb_msgs/msg/lsdb_command_stamped.hpp"
@@ -53,6 +54,7 @@ private:
   bool is_emergency_{false};
   rclcpp::Time prev_control_cmd_stamp_{0, 0, RCL_ROS_TIME};
   bool is_control_command_timeout_;
+  bool estop_button_status_{false};
 
   lsdb_msgs::msg::LsdbCommandStamped s1_right_cmd_, s1_left_cmd_;
   lsdb_msgs::msg::LsdbStatusStamped::ConstSharedPtr lsdb_right_status_ptr_,
@@ -60,6 +62,7 @@ private:
   autoware_auto_vehicle_msgs::msg::GearCommand::ConstSharedPtr gear_cmd_ptr_;
   autoware_auto_vehicle_msgs::msg::HazardLightsCommand::ConstSharedPtr hazard_light_cmd_ptr_;
   rclcpp::TimerBase::SharedPtr cmd_timer_;
+  dio_ros_driver::msg::DIOPort dout1_msg_;
 
   void onAckermannControlCmd(
     const autoware_auto_control_msgs::msg::AckermannControlCommand::ConstSharedPtr msg);
@@ -71,6 +74,7 @@ private:
   void onEmergencyCmd(const tier4_vehicle_msgs::msg::VehicleEmergencyStamped::ConstSharedPtr msg);
   void onLsdbRightStatus(const lsdb_msgs::msg::LsdbStatusStamped::ConstSharedPtr msg);
   void onLsdbLeftStatus(const lsdb_msgs::msg::LsdbStatusStamped::ConstSharedPtr msg);
+  void onDin0Estop(const dio_ros_driver::msg::DIOPort::ConstSharedPtr msg);
   void convertTwistToWheelsRPM(
     const double trans_vel, const double angular_vel, double * const left_wheel_rpm,
     double * const right_wheel_rpm);
@@ -81,7 +85,6 @@ private:
   void publishVelocityAndSteering(
     lsdb_msgs::msg::LsdbStatusStamped::ConstSharedPtr left_msg,
     lsdb_msgs::msg::LsdbStatusStamped::ConstSharedPtr right_msg);
-  // void publishTurnIndicator(); // AVA-3510 DIO
 
   // Diagnostics
   // void setupDiagnosticUpdater(); Chage to LSDB Diag
@@ -96,12 +99,13 @@ private:
     hazard_lights_cmd_sub_;
   rclcpp::Subscription<autoware_auto_vehicle_msgs::msg::GearCommand>::SharedPtr gear_cmd_sub_;
   rclcpp::Subscription<tier4_vehicle_msgs::msg::VehicleEmergencyStamped>::SharedPtr emergency_sub_;
-
   // Subscribe from lsdb
   rclcpp::Subscription<lsdb_msgs::msg::LsdbStatusStamped>::SharedPtr lsdb_left_status_sub_;
   rclcpp::Subscription<lsdb_msgs::msg::LsdbStatusStamped>::SharedPtr lsdb_right_status_sub_;
   rclcpp::Subscription<std_msgs::msg::Int8>::SharedPtr right_motor_status_sub_;
   rclcpp::Subscription<std_msgs::msg::Int8>::SharedPtr left_motor_status_sub_;
+  // Subscribe from AVA-3510 Din
+  rclcpp::Subscription<dio_ros_driver::msg::DIOPort>::SharedPtr din0_estop_sub_;
 
   // Publish to s1
   rclcpp::Publisher<lsdb_msgs::msg::LsdbCommandStamped>::SharedPtr s1_cmd_right_pub_;
@@ -122,6 +126,11 @@ private:
   rclcpp::Publisher<tier4_debug_msgs::msg::Float32Stamped>::SharedPtr
     steering_wheel_deg_status_pub_;
   rclcpp::Publisher<tier4_vehicle_msgs::msg::BatteryStatus>::SharedPtr battery_charge_status_pub_;
+  // Publish to AVA-3510 Dout
+  rclcpp::Publisher<dio_ros_driver::msg::DIOPort>::SharedPtr dout0_brake_light_pub_;
+  rclcpp::Publisher<dio_ros_driver::msg::DIOPort>::SharedPtr dout1_front_light_pub_;
+  rclcpp::Publisher<dio_ros_driver::msg::DIOPort>::SharedPtr dout2_right_blinker_pub_;
+  rclcpp::Publisher<dio_ros_driver::msg::DIOPort>::SharedPtr dout3_left_blinker_pub_;
 };
 
 #endif  // LSDB_INTERFACE__LSDB_INTERFACE_HPP_

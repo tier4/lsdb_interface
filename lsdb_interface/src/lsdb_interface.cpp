@@ -35,35 +35,27 @@ LsdbInterface::LsdbInterface(const rclcpp::NodeOptions & node_options)
     this->create_subscription<autoware_auto_control_msgs::msg::AckermannControlCommand>(
       "/control/command/control_cmd", 1,
       std::bind(&LsdbInterface::onAckermannControlCmd, this, _1));
-
   gear_cmd_sub_ = this->create_subscription<autoware_auto_vehicle_msgs::msg::GearCommand>(
     "/control/command/gear_cmd", 1, std::bind(&LsdbInterface::onGearCmd, this, _1));
-
-  // turn_indicators_cmd_sub_ =                                                             // Change to AVA-3510 DIO
-  //   this->create_subscription<autoware_auto_vehicle_msgs::msg::TurnIndicatorsCommand>(
-  //     "/control/command/turn_indicators_cmd", 1,
-  //     std::bind(&LsdbInterface::onTurnIndicatorsCmd, this, _1));
-
+  turn_indicators_cmd_sub_ =
+    this->create_subscription<autoware_auto_vehicle_msgs::msg::TurnIndicatorsCommand>(
+      "/control/command/turn_indicators_cmd", 1,
+      std::bind(&LsdbInterface::onTurnIndicatorsCmd, this, _1));
   hazard_lights_cmd_sub_ =
     this->create_subscription<autoware_auto_vehicle_msgs::msg::HazardLightsCommand>(
       "/control/command/hazard_lights_cmd", 1,
       std::bind(&LsdbInterface::onHazardLightsCmd, this, _1));
-
   emergency_sub_ = create_subscription<tier4_vehicle_msgs::msg::VehicleEmergencyStamped>(
     "/control/command/emergency_cmd", 1, std::bind(&LsdbInterface::onEmergencyCmd, this, _1));
-
   // Subscribe from lsdb
   lsdb_left_status_sub_ = this->create_subscription<lsdb_msgs::msg::LsdbStatusStamped>(
     "~/input/lsdb/left/status", 1, std::bind(&LsdbInterface::onLsdbLeftStatus, this, _1));
-
   lsdb_right_status_sub_ = this->create_subscription<lsdb_msgs::msg::LsdbStatusStamped>(
     "~/input/lsdb/right/status", 1, std::bind(&LsdbInterface::onLsdbRightStatus, this, _1));
+  // Subscribe from AVA-3510 Din
+  din0_estop_sub_ = this->create_subscription<dio_ros_driver::msg::DIOPort>(
+    "/dio/din0", 1, std::bind(&LsdbInterface::onDin0Estop, this, _1));
 
-  // Publish to s1
-  s1_cmd_left_pub_ =
-    this->create_publisher<lsdb_msgs::msg::LsdbCommandStamped>("~/output/left/command", 1);
-  s1_cmd_right_pub_ =
-    this->create_publisher<lsdb_msgs::msg::LsdbCommandStamped>("~/output/right/command", 1);
   // Publish to autoware
   velocity_status_pub_ = this->create_publisher<autoware_auto_vehicle_msgs::msg::VelocityReport>(
     "/vehicle/status/velocity_status", 1);
@@ -86,6 +78,16 @@ LsdbInterface::LsdbInterface(const rclcpp::NodeOptions & node_options)
     "/vehicle/status/steering_wheel_deg", 1);
   battery_charge_status_pub_ = this->create_publisher<tier4_vehicle_msgs::msg::BatteryStatus>(
     "/vehicle/status/battery_charge", 1);
+  // Publish to s1
+  s1_cmd_left_pub_ =
+    this->create_publisher<lsdb_msgs::msg::LsdbCommandStamped>("~/output/left/command", 1);
+  s1_cmd_right_pub_ =
+    this->create_publisher<lsdb_msgs::msg::LsdbCommandStamped>("~/output/right/command", 1);
+  // Publish to AVA-3510 Dout
+  dout0_brake_light_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout0", 1);
+  dout1_front_light_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout1", 1);
+  dout2_right_blinker_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout2", 1);
+  dout3_left_blinker_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout3", 1);
 
   // setupDiagnosticUpdater();
 
@@ -109,27 +111,28 @@ void LsdbInterface::onTimer()
 
 void LsdbInterface::publishZeroCommand()
 {
-  // using lsdb_msgs::msg::DigitalOutCommand;
+  dio_ros_driver::msg::DIOPort dout0_msg;
+  dout0_msg.value = false;
+  dout0_brake_light_pub_->publish(dout0_msg);
+
   s1_right_cmd_.stamp = this->now();
   s1_left_cmd_.stamp = this->now();
   s1_left_cmd_.command.speed = 0.0;
   s1_right_cmd_.command.speed = 0.0;
-  // s1_right_cmd_.command.digital_output.data.at(0) = DigitalOutCommand::LOW;
-  // s1_left_cmd_.command.digital_output.data.at(0) = DigitalOutCommand::LOW;
   s1_cmd_right_pub_->publish(s1_right_cmd_);
   s1_cmd_left_pub_->publish(s1_left_cmd_);
 }
 
 void LsdbInterface::publishCommand()
 {
-  // using lsdb_msgs::msg::DigitalOutCommand;
-  // if (s1_right_cmd_.command.speed < FLT_EPSILON && s1_left_cmd_.command.speed < FLT_EPSILON) {
-  //   s1_right_cmd_.command.digital_output.data.at(0) = DigitalOutCommand::HIGH;
-  //   s1_left_cmd_.command.digital_output.data.at(0) = DigitalOutCommand::HIGH;
-  // } else {
-  //   s1_right_cmd_.command.digital_output.data.at(0) = DigitalOutCommand::LOW;
-  //   s1_left_cmd_.command.digital_output.data.at(0) = DigitalOutCommand::LOW;
-  // }
+  dio_ros_driver::msg::DIOPort dout0_msg;
+  if (s1_right_cmd_.command.speed < FLT_EPSILON && s1_left_cmd_.command.speed < FLT_EPSILON) {
+    dout0_msg.value = false;
+    dout0_brake_light_pub_->publish(dout0_msg);
+  } else {
+    dout0_msg.value = true;
+    dout0_brake_light_pub_->publish(dout0_msg);
+  }
 
   s1_cmd_right_pub_->publish(s1_right_cmd_);
   s1_cmd_left_pub_->publish(s1_left_cmd_);
@@ -182,39 +185,6 @@ void LsdbInterface::publishVelocityAndSteering(
   steering_wheel_deg_status_pub_->publish(steer_wheel_deg_msg);
 }
 
-// void LsdbInterface::publishTurnIndicator(                          // Change to AVA-3510 DIO
-//   lsdb_msgs::msg::RoboteqStatusStamped::ConstSharedPtr left_msg,
-//   lsdb_msgs::msg::RoboteqStatusStamped::ConstSharedPtr right_msg)
-// {
-//   using autoware_auto_vehicle_msgs::msg::HazardLightsReport;
-//   using autoware_auto_vehicle_msgs::msg::TurnIndicatorsReport;
-
-//   auto hazard_report_msg = HazardLightsReport{};
-//   hazard_report_msg.stamp = this->now();
-//   auto turn_indicator_report_msg = TurnIndicatorsReport{};
-//   turn_indicator_report_msg.stamp = this->now();
-
-//   const auto & left_digital_output = left_msg->status.digital_output;
-//   const auto & right_digital_output = right_msg->status.digital_output;
-
-//   if (left_digital_output.at(1) == 0 && right_digital_output.at(1) == 0) {
-//     turn_indicator_report_msg.report = TurnIndicatorsReport::DISABLE;
-//     hazard_report_msg.report = HazardLightsReport::DISABLE;
-//   } else if (left_digital_output.at(1) == 1 && right_digital_output.at(1) == 0) {
-//     turn_indicator_report_msg.report = TurnIndicatorsReport::ENABLE_LEFT;
-//     hazard_report_msg.report = HazardLightsReport::DISABLE;
-//   } else if (left_digital_output.at(1) == 0 && right_digital_output.at(1) == 1) {
-//     turn_indicator_report_msg.report = TurnIndicatorsReport::ENABLE_RIGHT;
-//     hazard_report_msg.report = HazardLightsReport::DISABLE;
-//   } else if (left_digital_output.at(1) == 1 && right_digital_output.at(1) == 1) {
-//     turn_indicator_report_msg.report = TurnIndicatorsReport::DISABLE;
-//     hazard_report_msg.report = HazardLightsReport::ENABLE;
-//   }
-
-//   turn_indicators_status_pub_->publish(turn_indicator_report_msg);
-//   hazard_lights_status_pub_->publish(hazard_report_msg);
-// }
-
 void LsdbInterface::onAckermannControlCmd(
   const autoware_auto_control_msgs::msg::AckermannControlCommand::ConstSharedPtr msg)
 {
@@ -244,46 +214,65 @@ void LsdbInterface::onAckermannControlCmd(
   prev_control_cmd_stamp_ = this->now();
 }
 
-// void LsdbInterface::onTurnIndicatorsCmd(                                                 // Change to AVA-3510 DIO
-//   const autoware_auto_vehicle_msgs::msg::TurnIndicatorsCommand::ConstSharedPtr msg)
-// {
-//   using autoware_auto_vehicle_msgs::msg::HazardLightsCommand;
-//   using autoware_auto_vehicle_msgs::msg::TurnIndicatorsCommand;
-//   using lsdb_msgs::msg::DigitalOutCommand;
+void LsdbInterface::onTurnIndicatorsCmd(                                                 // Change to AVA-3510 DIO
+  const autoware_auto_vehicle_msgs::msg::TurnIndicatorsCommand::ConstSharedPtr msg)
+{
+  using autoware_auto_vehicle_msgs::msg::HazardLightsCommand;
+  using autoware_auto_vehicle_msgs::msg::HazardLightsReport;
+  using autoware_auto_vehicle_msgs::msg::TurnIndicatorsCommand;
+  using autoware_auto_vehicle_msgs::msg::TurnIndicatorsReport;
 
-//   if (!hazard_light_cmd_ptr_) {
-//     RCLCPP_WARN_STREAM(this->get_logger(), "hazard light command is not subscribed");
-//     return;
-//   }
+  auto hazard_report_msg = HazardLightsReport{};
+  hazard_report_msg.stamp = this->now();
+  auto turn_indicator_report_msg = TurnIndicatorsReport{};
+  turn_indicator_report_msg.stamp = this->now();
 
-//   if (hazard_light_cmd_ptr_->command == HazardLightsCommand::ENABLE) {
-//     s1_right_cmd_.command.digital_output.data.at(1) = DigitalOutCommand::HIGH;
-//     s1_left_cmd_.command.digital_output.data.at(1) = DigitalOutCommand::HIGH;
-//   } else {
-//     switch (msg->command) {
-//       case TurnIndicatorsCommand::NO_COMMAND:
-//         s1_right_cmd_.command.digital_output.data.at(1) = DigitalOutCommand::LOW;
-//         s1_left_cmd_.command.digital_output.data.at(1) = DigitalOutCommand::LOW;
-//         break;
-//       case TurnIndicatorsCommand::DISABLE:
-//         s1_right_cmd_.command.digital_output.data.at(1) = DigitalOutCommand::LOW;
-//         s1_left_cmd_.command.digital_output.data.at(1) = DigitalOutCommand::LOW;
-//         break;
-//       case TurnIndicatorsCommand::ENABLE_LEFT:
-//         s1_right_cmd_.command.digital_output.data.at(1) = DigitalOutCommand::LOW;
-//         s1_left_cmd_.command.digital_output.data.at(1) = DigitalOutCommand::HIGH;
-//         break;
-//       case TurnIndicatorsCommand::ENABLE_RIGHT:
-//         s1_right_cmd_.command.digital_output.data.at(1) = DigitalOutCommand::HIGH;
-//         s1_left_cmd_.command.digital_output.data.at(1) = DigitalOutCommand::LOW;
-//         break;
-//       default:
-//         RCLCPP_ERROR_THROTTLE(
-//           this->get_logger(), *get_clock(), 3000, "error: turn_indicator_cmd = %d", msg->command);
-//         break;
-//     }
-//   }
-// }
+  dio_ros_driver::msg::DIOPort dio2_msg, dio3_msg;
+
+  if (!hazard_light_cmd_ptr_) {
+    RCLCPP_WARN_STREAM(this->get_logger(), "hazard light command is not subscribed");
+    return;
+  }
+
+  if (hazard_light_cmd_ptr_->command == HazardLightsCommand::ENABLE) {
+    hazard_report_msg.report = HazardLightsReport::ENABLE;
+    dio2_msg.value = false;
+    dio3_msg.value = false;
+  } else {
+    turn_indicator_report_msg.report = TurnIndicatorsReport::DISABLE;
+    switch (msg->command) {
+      case TurnIndicatorsCommand::NO_COMMAND:
+        turn_indicator_report_msg.report = TurnIndicatorsReport::DISABLE;
+        dio2_msg.value = true;
+        dio3_msg.value = true;
+        break;
+      case TurnIndicatorsCommand::DISABLE:
+        turn_indicator_report_msg.report = TurnIndicatorsReport::DISABLE;
+        dio2_msg.value = true;
+        dio3_msg.value = true;
+        break;
+      case TurnIndicatorsCommand::ENABLE_LEFT:
+        turn_indicator_report_msg.report = TurnIndicatorsReport::ENABLE_LEFT;
+        dio2_msg.value = true;
+        dio3_msg.value = false;
+        break;
+      case TurnIndicatorsCommand::ENABLE_RIGHT:
+        turn_indicator_report_msg.report = TurnIndicatorsReport::ENABLE_RIGHT;
+        dio2_msg.value = false;
+        dio3_msg.value = true;
+        break;
+      default:
+        RCLCPP_ERROR_THROTTLE(
+          this->get_logger(), *get_clock(), 3000, "error: turn_indicator_cmd = %d", msg->command);
+        break;
+    }
+  }
+
+  turn_indicators_status_pub_->publish(turn_indicator_report_msg);
+  hazard_lights_status_pub_->publish(hazard_report_msg);
+  dout2_right_blinker_pub_->publish(dio2_msg);
+  dout3_left_blinker_pub_->publish(dio3_msg);
+}
 
 void LsdbInterface::onHazardLightsCmd(
   const autoware_auto_vehicle_msgs::msg::HazardLightsCommand::ConstSharedPtr msg)
@@ -359,6 +348,11 @@ void LsdbInterface::onLsdbRightStatus(
   const lsdb_msgs::msg::LsdbStatusStamped::ConstSharedPtr msg)
 {
   lsdb_right_status_ptr_ = msg;
+}
+
+void LsdbInterface::onDin0Estop(const dio_ros_driver::msg::DIOPort::ConstSharedPtr msg)
+{
+  estop_button_status_ = !msg->value;
 }
 
 #include "rclcpp_components/register_node_macro.hpp"
