@@ -16,24 +16,24 @@
 
 #include <string>
 
-void LsdbInterface::setupLsdbDiagnosticUpdater()
+void LsdbInterface::setupDiagnosticUpdater()
 {
-  lsdb_diagnostic_updater_.setHardwareID("LSDB Motor Driver");
-  lsdb_diagnostic_updater_.add("Internal error", this, &LsdbInterface::checkInternalErr);
-  lsdb_diagnostic_updater_.add("Encoder ABZ signal error", this, &LsdbInterface::checkEncoderABZSignalErr);
-  lsdb_diagnostic_updater_.add("Encoder UVW signal error", this, &LsdbInterface::checkEncoderUVWSignalErr);
-  lsdb_diagnostic_updater_.add("Encoder counting error", this, &LsdbInterface::checkEncoderCountingErr);
-  lsdb_diagnostic_updater_.add("Driver temperature too high", this, &LsdbInterface::checkDriverTempHigh);
-  lsdb_diagnostic_updater_.add("Driver bus voltage too high", this, &LsdbInterface::checkDriverBusVoltageHigh);
-  lsdb_diagnostic_updater_.add("Driver bus voltage too low", this, &LsdbInterface::checkDriverBusVoltageLow);
-  lsdb_diagnostic_updater_.add("Driver output short-circuit", this, &LsdbInterface::checkDriverOutputShortCircuit);
-  lsdb_diagnostic_updater_.add("Braking resistor temperature too high", this, &LsdbInterface::checkBrakingResistorTempHigh);
-  lsdb_diagnostic_updater_.add("Following error over-range", this, &LsdbInterface::checkFollowingErrOverRange);
-  lsdb_diagnostic_updater_.add("I²T error(Overload)", this, &LsdbInterface::checkOverload);
-  lsdb_diagnostic_updater_.add("Speed following error over-range", this, &LsdbInterface::checkSpeedFolowingErrOverRange);
-  lsdb_diagnostic_updater_.add("Motor temperature too high", this, &LsdbInterface::checkMotorTempHigh);
-  lsdb_diagnostic_updater_.add("Searching motor failed(Communication encoder)", this, &LsdbInterface::checkSearchingMotorFailed);
-  lsdb_diagnostic_updater_.add("Communication failed", this, &LsdbInterface::checkCommunicationFailed);
+  diagnostic_updater_.setHardwareID("LSDB Motor Driver");
+  diagnostic_updater_.add("Internal error", this, &LsdbInterface::checkInternalErr);
+  diagnostic_updater_.add("Encoder ABZ signal error", this, &LsdbInterface::checkEncoderABZSignalErr);
+  diagnostic_updater_.add("Encoder UVW signal error", this, &LsdbInterface::checkEncoderUVWSignalErr);
+  diagnostic_updater_.add("Encoder counting error", this, &LsdbInterface::checkEncoderCountingErr);
+  diagnostic_updater_.add("Driver temperature too high", this, &LsdbInterface::checkDriverTempHigh);
+  diagnostic_updater_.add("Driver bus voltage too high", this, &LsdbInterface::checkDriverBusVoltageHigh);
+  diagnostic_updater_.add("Driver bus voltage too low", this, &LsdbInterface::checkDriverBusVoltageLow);
+  diagnostic_updater_.add("Driver output short-circuit", this, &LsdbInterface::checkDriverOutputShortCircuit);
+  diagnostic_updater_.add("Braking resistor temperature too high", this, &LsdbInterface::checkBrakingResistorTempHigh);
+  diagnostic_updater_.add("Following error over-range", this, &LsdbInterface::checkFollowingErrOverRange);
+  diagnostic_updater_.add("I²T error(Overload)", this, &LsdbInterface::checkOverload);
+  diagnostic_updater_.add("Speed following error over-range", this, &LsdbInterface::checkSpeedFolowingErrOverRange);
+  diagnostic_updater_.add("Motor temperature too high", this, &LsdbInterface::checkMotorTempHigh);
+  diagnostic_updater_.add("Searching motor failed(Communication encoder)", this, &LsdbInterface::checkSearchingMotorFailed);
+  diagnostic_updater_.add("Communication failed", this, &LsdbInterface::checkCommunicationFailed);
 }
 
 void LsdbInterface::checkDriverErrCode(const int bit_number, diagnostic_updater::DiagnosticStatusWrapper & stat)
@@ -69,11 +69,11 @@ void LsdbInterface::checkDriverErrCode(const int bit_number, diagnostic_updater:
   }
 
   std::string additional_msg = "";
-  if (lsdb_left_status_ptr_->status.driver_err_code.at(bit_number) == 1) {
+  if (lsdb_left_status_ptr_->status.driver_err_code.data.at(bit_number) == 1) {
     level = DiagnosticStatus::ERROR;
     additional_msg = "Left error";
   }
-  if (lsdb_right_status_ptr_->status.driver_err_code.at(bit_number) == 1) {
+  if (lsdb_right_status_ptr_->status.driver_err_code.data.at(bit_number) == 1) {
     if (level == DiagnosticStatus::ERROR) {
       additional_msg = "Both error";
     }

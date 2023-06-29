@@ -16,7 +16,7 @@ ament_auto_find_build_dependencies()
 
 ament_auto_add_library(lsdb_interface_node SHARED
   src/lsdb_interface.cpp
-  # src/lsdb_interface_diagnostic.cpp
+  src/lsdb_interface_diagnostic.cpp
 )
 
 rclcpp_components_register_node(lsdb_interface_node
