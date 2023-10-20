@@ -23,7 +23,7 @@ LsdbCanInterface::LsdbCanInterface(const rclcpp::NodeOptions & node_options)
   // Parameters
   const uint32_t node_id = declare_parameter<int>("node_id", 1);
   sending_can_id_ = (uint32_t)(1536 + node_id);     // 0x600 + node_id
-  receiving_can_id_ = (uint32_t)(1498 + node_id);   // 0x580 + node_id
+  receiving_can_id_ = (uint32_t)(1408 + node_id);   // 0x580 + node_id
   pdo_fnc_can_id_ = (uint32_t)(384 + node_id);      // 0x180 + node_id
 
   const double trapezoidal_accel = declare_parameter<double>("trapezoidal_accel", 2.0);
@@ -115,7 +115,7 @@ void LsdbCanInterface::lsdbInitialization(const uint32_t can_cmd_id, const bool 
   case InitStatus::Setting_motor_operation:
       if (can_cmd_id == spec_map[CommandID::eControl_word].can_cmd_id) {
         if (is_write_success){
-          sendCommand(CommandID::eSimple_PDO_function, (int16_t)0x0F, ComType::write);
+          sendCommand(CommandID::eSimple_PDO_function, (int16_t)0x01, ComType::write);
           initialize_status_ = InitStatus::Setting_pdo_function;
         } else {
           sendCommand(CommandID::eControl_word, (int8_t)0x03, ComType::write);
