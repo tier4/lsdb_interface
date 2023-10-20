@@ -1,8 +1,6 @@
 <launch>
   <arg name="mode" default="serial" description="options: can, serial"/>
   <arg name="can_device" default="can0"/>
-  <arg name="roboteq_left_serial_port" default="/dev/ttyFixedLeft"/>
-  <arg name="roboteq_right_serial_port" default="/dev/ttyFixedRight"/>
   <arg name="lsdb_left_serial_port" default="/dev/ttyS0"/>
   <arg name="lsdb_right_serial_port" default="/dev/ttyS1"/>
 
@@ -21,6 +19,32 @@
 
   <group>
     <push-ros-namespace namespace="s1"/>
+
+    <!-- can interface -->
+    <group if="$(eval &quot;'$(var mode)'=='can'&quot;)">
+      <group>
+        <push-ros-namespace namespace="lsdb/left"/>
+        <include file="$(find-pkg-share lsdb_can_interface)/launch/lsdb_can_interface.launch.xml">
+          <arg name="input_command" value="$(var s1_left_command)"/>
+          <arg name="node_id" value="1"/>
+          <arg name="trapezoidal_accel" value="4.0"/>
+          <arg name="trapezoidal_decel" value="4.0"/>
+          <arg name="status_loop_rate_hz" value="10"/>
+        </include>
+      </group>
+
+      <group>
+        <push-ros-namespace namespace="lsdb/right"/>
+        <include file="$(find-pkg-share lsdb_can_interface)/launch/lsdb_can_interface.launch.xml">
+          <arg name="input_command" value="$(var s1_left_command)"/>
+          <arg name="node_id" value="2"/>
+          <arg name="trapezoidal_accel" value="4.0"/>
+          <arg name="trapezoidal_decel" value="4.0"/>
+          <arg name="status_loop_rate_hz" value="10"/>
+        </include>
+      </group>
+    </group>
+
 
     <!-- serial interface -->
     <group if="$(eval &quot;'$(var mode)'=='serial'&quot;)">
