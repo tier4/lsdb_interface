@@ -9,7 +9,6 @@
 
   <node pkg="lsdb_can_interface" name="lsdb_can_interface" exec="lsdb_can_interface" output="log">
     <remap from="~/input/command" to="$(var input_command)"/>
-    <remap from="" to=""/>
     <param name="node_id" value="$(var node_id)"/>
     <param name="trapezoidal_accel" value="$(var trapezoidal_accel)"/>
     <param name="trapezoidal_decel" value="$(var trapezoidal_decel)"/>
