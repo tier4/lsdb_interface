@@ -55,7 +55,6 @@ private:
   lsdb_msgs::msg::LsdbStatusStamped lsdb_status_;
 
   // Funcsion
-  void startInitialization();
   void lsdbInitialization(const uint32_t can_cmd_id, const bool is_write_success);
   void onTimer();
   template <typename T>

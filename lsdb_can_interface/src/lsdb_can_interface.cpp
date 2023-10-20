@@ -43,28 +43,22 @@ LsdbCanInterface::LsdbCanInterface(const rclcpp::NodeOptions & node_options)
   status_pub_ = this->create_publisher<lsdb_msgs::msg::LsdbStatusStamped>("~/output/status", 10);
   can_pub_ = this->create_publisher<can_msgs::msg::Frame>("/to_can_bus", 10);
 
-  // Initial settings to LSDB driver
-  startInitialization();
-
   // Timer
   const auto period_ns = rclcpp::Rate(status_loop_rate_hz).period();
   on_timer_ = rclcpp::create_timer(
     this, this->get_clock(), period_ns, std::bind(&LsdbCanInterface::onTimer, this));
 }
 
-void LsdbCanInterface::startInitialization()
-{
-  using namespace lsdb_command_list;
-
-  while (initialize_status_ == InitStatus::Start) {
-    sendCommand(CommandID::eTrapezoidal_acceleration, trapezoidal_accel_, ComType::write);
-    rclcpp::sleep_for(std::chrono::milliseconds(1000));
-  }
-}
-
 void LsdbCanInterface::onTimer()
 {
   using namespace lsdb_command_list;
+
+  // Initial settings to LSDB driver
+  if (initialize_status_ == InitStatus::Start) {
+    sendCommand(CommandID::eTrapezoidal_acceleration, trapezoidal_accel_, ComType::write);
+    return;
+  }
+
   // send READ status commands
   sendCommand(CommandID::eControl_word, (int16_t)0x00, ComType::read);
   sendCommand(CommandID::eDrive_error_status_word_1, (uint16_t)0x00, ComType::read);
