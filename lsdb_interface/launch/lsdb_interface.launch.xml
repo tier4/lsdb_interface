@@ -6,8 +6,6 @@
 
   <arg name="s1_left_command" default="/s1/left/command"/>
   <arg name="s1_right_command" default="/s1/right/command"/>
-  <arg name="lsdb_left_status" default="lsdb/left/status"/>
-  <arg name="lsdb_right_status" default="lsdb/right/status"/>
 
   <arg name="lsdb_serial_timeout_sec" default="0.5"/>
 
@@ -32,7 +30,6 @@
         <push-ros-namespace namespace="lsdb/left"/>
         <include file="$(find-pkg-share lsdb_can_interface)/launch/lsdb_can_interface.launch.xml">
           <arg name="input_command" value="$(var s1_left_command)"/>
-          <arg name="output_status" value="$(var lsdb_left_status)"/>
           <arg name="node_id" value="1"/>
           <arg name="trapezoidal_accel" value="4.0"/>
           <arg name="trapezoidal_decel" value="4.0"/>
@@ -44,7 +41,6 @@
         <push-ros-namespace namespace="lsdb/right"/>
         <include file="$(find-pkg-share lsdb_can_interface)/launch/lsdb_can_interface.launch.xml">
           <arg name="input_command" value="$(var s1_right_command)"/>
-          <arg name="output_status" value="$(var lsdb_right_status)"/>
           <arg name="node_id" value="2"/>
           <arg name="trapezoidal_accel" value="4.0"/>
           <arg name="trapezoidal_decel" value="4.0"/>
