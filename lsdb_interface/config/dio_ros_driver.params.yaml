@@ -1,0 +1,14 @@
+# all config data are described here.
+
+# ports are given dictionary
+# whose key is port id,
+# and value is port address
+/dio/dio_ros_driver_node:
+  ros__parameters:
+    chip_name: "gpiochip0"
+    access_frequency: 10 # Hz with positive integer.
+    din_value_inverse: false
+    din_port_offset: [72, 73, 74, 75, 76, 77, 78, 79]
+    dout_value_inverse: true
+    dout_default_value: true
+    dout_port_offset: [105, 106, 107, 108, 109, 110, 111, 112]

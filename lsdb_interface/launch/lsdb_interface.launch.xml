@@ -19,6 +19,9 @@
 
   <group if="$(eval &quot;'$(var mode)'=='can'&quot;)">
     <include file="$(find-pkg-share ros2_socketcan)/launch/socket_can_bridge.launch.xml"/>
+    <include file="$(find-pkg-share dio_ros_driver)/launch/dio_ros_driver.launch.xml">
+      <arg name="config_file" default="$(find-pkg-share lsdb_interface)/config/dio_ros_driver.params.yaml"/>
+    </include>
   </group>
 
   <group>
