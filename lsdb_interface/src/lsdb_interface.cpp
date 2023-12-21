@@ -45,6 +45,10 @@ LsdbInterface::LsdbInterface(const rclcpp::NodeOptions & node_options)
     this->create_subscription<autoware_auto_vehicle_msgs::msg::HazardLightsCommand>(
       "/control/command/hazard_lights_cmd", 1,
       std::bind(&LsdbInterface::onHazardLightsCmd, this, _1));
+  head_lights_cmd_sub_ =
+    this->create_subscription<autoware_auto_vehicle_msgs::msg::HeadlightsCommand>(
+      "/control/command/head_lights_cmd", 1,
+      std::bind(&LsdbInterface::onHeadLightsCmd, this, _1));
   emergency_sub_ = create_subscription<tier4_vehicle_msgs::msg::VehicleEmergencyStamped>(
     "/control/command/emergency_cmd", 1, std::bind(&LsdbInterface::onEmergencyCmd, this, _1));
   // Subscribe from lsdb
