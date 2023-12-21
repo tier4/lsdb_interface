@@ -25,6 +25,8 @@
 #include "autoware_auto_vehicle_msgs/msg/gear_report.hpp"
 #include "autoware_auto_vehicle_msgs/msg/hazard_lights_command.hpp"
 #include "autoware_auto_vehicle_msgs/msg/hazard_lights_report.hpp"
+#include "autoware_auto_vehicle_msgs/msg/headlights_command.hpp"
+#include "autoware_auto_vehicle_msgs/msg/headlights_report.hpp"
 #include "autoware_auto_vehicle_msgs/msg/steering_report.hpp"
 #include "autoware_auto_vehicle_msgs/msg/turn_indicators_command.hpp"
 #include "autoware_auto_vehicle_msgs/msg/turn_indicators_report.hpp"
@@ -70,6 +72,8 @@ private:
     const autoware_auto_vehicle_msgs::msg::TurnIndicatorsCommand::ConstSharedPtr msg);
   void onHazardLightsCmd(
     const autoware_auto_vehicle_msgs::msg::HazardLightsCommand::ConstSharedPtr msg);
+  void onHeadLightsCmd(
+    const autoware_auto_vehicle_msgs::msg::HeadlightsCommand::ConstSharedPtr msg);
   void onGearCmd(const autoware_auto_vehicle_msgs::msg::GearCommand::ConstSharedPtr msg);
   void onEmergencyCmd(const tier4_vehicle_msgs::msg::VehicleEmergencyStamped::ConstSharedPtr msg);
   void onLsdbRightStatus(const lsdb_msgs::msg::LsdbStatusStamped::ConstSharedPtr msg);

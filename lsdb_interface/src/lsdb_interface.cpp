@@ -280,6 +280,27 @@ void LsdbInterface::onHazardLightsCmd(
   hazard_light_cmd_ptr_ = msg;
 }
 
+void LsdbInterface::onHeadLightsCmd(
+  const autoware_auto_vehicle_msgs::msg::HeadlightsCommand::ConstSharedPtr msg)
+{
+  dio_ros_driver::msg::DIOPort dout1_msg;
+
+  switch (msg->command)
+  {
+  case 1:
+    dout1_msg.value = false;
+    dout1_front_light_pub_->publish(dout1_msg);
+    break;
+  case 2:
+  case 3:
+    dout1_msg.value = true;
+    dout1_front_light_pub_->publish(dout1_msg);
+    break;
+  default:
+    break;
+  }
+}
+
 void LsdbInterface::onGearCmd(
   const autoware_auto_vehicle_msgs::msg::GearCommand::ConstSharedPtr msg)
 {
