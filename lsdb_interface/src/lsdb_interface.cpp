@@ -292,12 +292,12 @@ void LsdbInterface::onHeadLightsCmd(
   switch (msg->command)
   {
   case 1:
-    dout1_msg.value = false;
+    dout1_msg.value = true;
     dout1_front_light_pub_->publish(dout1_msg);
     break;
   case 2:
   case 3:
-    dout1_msg.value = true;
+    dout1_msg.value = false;
     dout1_front_light_pub_->publish(dout1_msg);
     break;
   default:
