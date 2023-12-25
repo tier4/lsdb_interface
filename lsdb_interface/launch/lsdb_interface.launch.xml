@@ -28,7 +28,7 @@
         <push-ros-namespace namespace="lsdb/left"/>
         <include file="$(find-pkg-share lsdb_can_interface)/launch/lsdb_can_interface.launch.xml">
           <arg name="input_can" value="/$(var can_device)/from_can_bus"/>
-          <arg name="ourput_can" value="/$(var can_device)/to_can_bus"/>
+          <arg name="output_can" value="/$(var can_device)/to_can_bus"/>
           <arg name="input_command" value="$(var s1_left_command)"/>
           <arg name="node_id" value="2"/>
           <arg name="trapezoidal_accel" value="4.0"/>
@@ -41,7 +41,7 @@
         <push-ros-namespace namespace="lsdb/right"/>
         <include file="$(find-pkg-share lsdb_can_interface)/launch/lsdb_can_interface.launch.xml">
           <arg name="input_can" value="/$(var can_device)/from_can_bus"/>
-          <arg name="ourput_can" value="/$(var can_device)/to_can_bus"/>
+          <arg name="output_can" value="/$(var can_device)/to_can_bus"/>
           <arg name="input_command" value="$(var s1_right_command)"/>
           <arg name="node_id" value="1"/>
           <arg name="trapezoidal_accel" value="4.0"/>
