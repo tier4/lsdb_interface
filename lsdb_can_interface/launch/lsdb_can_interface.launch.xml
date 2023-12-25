@@ -2,8 +2,8 @@
   <!-- topic name -->
   <arg name="input_command" default="command"/>
   <arg name="output_status" default="status"/>
-  <arg name="input_can" default="from_can_bus"/>
-  <arg name="output_can" default="to_can_bus"/>
+  <arg name="input_can" default="/from_can_bus"/>
+  <arg name="output_can" default="/to_can_bus"/>
   <!-- parameters -->
   <arg name="node_id" default="1"/>
   <arg name="trapezoidal_accel" default="2.0"/>
