@@ -1,5 +1,6 @@
 <launch>
   <arg name="mode" default="can" description="options: can, serial"/>
+  <arg name="launch_can_bride" default="true"/>
   <arg name="can_device" default="can0"/>
   <arg name="lsdb_left_serial_port" default="/dev/ttyS0"/>
   <arg name="lsdb_right_serial_port" default="/dev/ttyS1"/>
@@ -9,7 +10,10 @@
   <arg name="vehicle_calibration_param_path" default="$(find-pkg-share lsdb_interface)/config/vehicle_calibration.param.yaml"/>
 
   <group if="$(eval &quot;'$(var mode)'=='can'&quot;)">
-    <include file="$(find-pkg-share ros2_socketcan)/launch/socket_can_bridge.launch.xml"/>
+    <group if="$(eval &quot;'$(var launch_can_bride)'=='true'&quot;)">
+      <push-ros-namespace namespace="$(var can_device)"/>
+      <include file="$(find-pkg-share ros2_socketcan)/launch/socket_can_bridge.launch.xml"/>
+    <group/>
     <include file="$(find-pkg-share dio_ros_driver)/launch/dio_ros_driver.launch.xml">
       <arg name="config_file" value="$(find-pkg-share lsdb_interface)/config/dio_ros_driver.params.yaml"/>
     </include>
@@ -23,6 +27,8 @@
       <group>
         <push-ros-namespace namespace="lsdb/left"/>
         <include file="$(find-pkg-share lsdb_can_interface)/launch/lsdb_can_interface.launch.xml">
+          <remap from="/from_can_bus" to="$(var can_device)/from_can_bus"/>
+          <remap from="/to_can_bus" to="$(var can_device)/to_can_bus"/>
           <arg name="input_command" value="$(var s1_left_command)"/>
           <arg name="node_id" value="2"/>
           <arg name="trapezoidal_accel" value="4.0"/>
@@ -34,6 +40,8 @@
       <group>
         <push-ros-namespace namespace="lsdb/right"/>
         <include file="$(find-pkg-share lsdb_can_interface)/launch/lsdb_can_interface.launch.xml">
+          <remap from="/from_can_bus" to="$(var can_device)/from_can_bus"/>
+          <remap from="/to_can_bus" to="$(var can_device)/to_can_bus"/>
           <arg name="input_command" value="$(var s1_right_command)"/>
           <arg name="node_id" value="1"/>
           <arg name="trapezoidal_accel" value="4.0"/>
