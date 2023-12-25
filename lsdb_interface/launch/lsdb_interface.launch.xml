@@ -13,7 +13,7 @@
     <group if="$(eval &quot;'$(var launch_can_bride)'=='true'&quot;)">
       <push-ros-namespace namespace="$(var can_device)"/>
       <include file="$(find-pkg-share ros2_socketcan)/launch/socket_can_bridge.launch.xml"/>
-    <group/>
+    </group>
     <include file="$(find-pkg-share dio_ros_driver)/launch/dio_ros_driver.launch.xml">
       <arg name="config_file" value="$(find-pkg-share lsdb_interface)/config/dio_ros_driver.params.yaml"/>
     </include>
