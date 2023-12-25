@@ -165,7 +165,6 @@ private:
   rclcpp::Publisher<tier4_debug_msgs::msg::Float32Stamped>::SharedPtr velocity_kmph_status_pub_;
   rclcpp::Publisher<tier4_debug_msgs::msg::Float32Stamped>::SharedPtr
     steering_wheel_deg_status_pub_;
-  rclcpp::Publisher<tier4_vehicle_msgs::msg::BatteryStatus>::SharedPtr battery_charge_status_pub_;
   // Publish to AVA-3510 Dout
   rclcpp::Publisher<dio_ros_driver::msg::DIOPort>::SharedPtr dout0_brake_light_pub_;
   rclcpp::Publisher<dio_ros_driver::msg::DIOPort>::SharedPtr dout1_front_light_pub_;

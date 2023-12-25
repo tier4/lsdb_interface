@@ -80,7 +80,7 @@ LsdbInterface::LsdbInterface(const rclcpp::NodeOptions & node_options)
     "/vehicle/status/velocity_kmph", 1);
   steering_wheel_deg_status_pub_ = this->create_publisher<tier4_debug_msgs::msg::Float32Stamped>(
     "/vehicle/status/steering_wheel_deg", 1);
-  battery_charge_status_pub_ = this->create_publisher<tier4_vehicle_msgs::msg::BatteryStatus>(
+  // battery_charge_status_pub_ = this->create_publisher<tier4_vehicle_msgs::msg::BatteryStatus>(
     "/vehicle/status/battery_charge", 1);
   // Publish to s1
   s1_cmd_left_pub_ =
