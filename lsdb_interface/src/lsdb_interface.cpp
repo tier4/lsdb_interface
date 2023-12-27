@@ -45,6 +45,10 @@ LsdbInterface::LsdbInterface(const rclcpp::NodeOptions & node_options)
     this->create_subscription<autoware_auto_vehicle_msgs::msg::HazardLightsCommand>(
       "/control/command/hazard_lights_cmd", 1,
       std::bind(&LsdbInterface::onHazardLightsCmd, this, _1));
+  head_lights_cmd_sub_ =
+    this->create_subscription<autoware_auto_vehicle_msgs::msg::HeadlightsCommand>(
+      "/control/command/head_lights_cmd", 1,
+      std::bind(&LsdbInterface::onHeadLightsCmd, this, _1));
   emergency_sub_ = create_subscription<tier4_vehicle_msgs::msg::VehicleEmergencyStamped>(
     "/control/command/emergency_cmd", 1, std::bind(&LsdbInterface::onEmergencyCmd, this, _1));
   // Subscribe from lsdb
@@ -76,8 +80,6 @@ LsdbInterface::LsdbInterface(const rclcpp::NodeOptions & node_options)
     "/vehicle/status/velocity_kmph", 1);
   steering_wheel_deg_status_pub_ = this->create_publisher<tier4_debug_msgs::msg::Float32Stamped>(
     "/vehicle/status/steering_wheel_deg", 1);
-  battery_charge_status_pub_ = this->create_publisher<tier4_vehicle_msgs::msg::BatteryStatus>(
-    "/vehicle/status/battery_charge", 1);
   // Publish to s1
   s1_cmd_left_pub_ =
     this->create_publisher<lsdb_msgs::msg::LsdbCommandStamped>("~/output/left/command", 1);
@@ -86,8 +88,8 @@ LsdbInterface::LsdbInterface(const rclcpp::NodeOptions & node_options)
   // Publish to AVA-3510 Dout
   dout0_brake_light_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout0", 1);
   dout1_front_light_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout1", 1);
-  dout2_right_blinker_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout2", 1);
-  dout3_left_blinker_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout3", 1);
+  dout2_left_blinker_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout2", 1);
+  dout3_right_blinker_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout3", 1);
 
   setupDiagnosticUpdater();
 
@@ -253,13 +255,13 @@ void LsdbInterface::onTurnIndicatorsCmd(                                        
         break;
       case TurnIndicatorsCommand::ENABLE_LEFT:
         turn_indicator_report_msg.report = TurnIndicatorsReport::ENABLE_LEFT;
-        dio2_msg.value = true;
-        dio3_msg.value = false;
+        dio2_msg.value = false;
+        dio3_msg.value = true;
         break;
       case TurnIndicatorsCommand::ENABLE_RIGHT:
         turn_indicator_report_msg.report = TurnIndicatorsReport::ENABLE_RIGHT;
-        dio2_msg.value = false;
-        dio3_msg.value = true;
+        dio2_msg.value = true;
+        dio3_msg.value = false;
         break;
       default:
         RCLCPP_ERROR_THROTTLE(
@@ -270,14 +272,35 @@ void LsdbInterface::onTurnIndicatorsCmd(                                        
 
   turn_indicators_status_pub_->publish(turn_indicator_report_msg);
   hazard_lights_status_pub_->publish(hazard_report_msg);
-  dout2_right_blinker_pub_->publish(dio2_msg);
-  dout3_left_blinker_pub_->publish(dio3_msg);
+  dout2_left_blinker_pub_->publish(dio2_msg);
+  dout3_right_blinker_pub_->publish(dio3_msg);
 }
 
 void LsdbInterface::onHazardLightsCmd(
   const autoware_auto_vehicle_msgs::msg::HazardLightsCommand::ConstSharedPtr msg)
 {
   hazard_light_cmd_ptr_ = msg;
+}
+
+void LsdbInterface::onHeadLightsCmd(
+  const autoware_auto_vehicle_msgs::msg::HeadlightsCommand::ConstSharedPtr msg)
+{
+  dio_ros_driver::msg::DIOPort dout1_msg;
+
+  switch (msg->command)
+  {
+  case 1:
+    dout1_msg.value = true;
+    dout1_front_light_pub_->publish(dout1_msg);
+    break;
+  case 2:
+  case 3:
+    dout1_msg.value = false;
+    dout1_front_light_pub_->publish(dout1_msg);
+    break;
+  default:
+    break;
+  }
 }
 
 void LsdbInterface::onGearCmd(

@@ -1,0 +1,24 @@
+<launch>
+  <!-- topic name -->
+  <arg name="input_command" default="command"/>
+  <arg name="output_status" default="status"/>
+  <arg name="input_can" default="/from_can_bus"/>
+  <arg name="output_can" default="/to_can_bus"/>
+  <!-- parameters -->
+  <arg name="node_id" default="1"/>
+  <arg name="trapezoidal_accel" default="2.0"/>
+  <arg name="trapezoidal_decel" default="2.0"/>
+  <arg name="status_loop_rate_hz" default="10.0"/>
+
+  <node pkg="lsdb_can_interface" name="lsdb_can_interface" exec="lsdb_can_interface" output="log">
+    <remap from="~/input/command" to="$(var input_command)"/>
+    <remap from="~/output/status" to="$(var output_status)"/>
+    <remap from="/from_can_bus" to="$(var input_can)"/>
+    <remap from="/to_can_bus" to="$(var output_can)"/>
+    <param name="node_id" value="$(var node_id)"/>
+    <param name="trapezoidal_accel" value="$(var trapezoidal_accel)"/>
+    <param name="trapezoidal_decel" value="$(var trapezoidal_decel)"/>
+    <param name="status_loop_rate_hz" value="$(var status_loop_rate_hz)"/>
+  </node>
+
+</launch>

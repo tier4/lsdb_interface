@@ -1,26 +1,56 @@
 <launch>
-  <arg name="mode" default="serial" description="options: can, serial"/>
+  <arg name="mode" default="can" description="options: can, serial"/>
+  <arg name="launch_can_bride" default="true"/>
   <arg name="can_device" default="can0"/>
-  <arg name="roboteq_left_serial_port" default="/dev/ttyFixedLeft"/>
-  <arg name="roboteq_right_serial_port" default="/dev/ttyFixedRight"/>
   <arg name="lsdb_left_serial_port" default="/dev/ttyS0"/>
   <arg name="lsdb_right_serial_port" default="/dev/ttyS1"/>
-
   <arg name="s1_left_command" default="/s1/left/command"/>
   <arg name="s1_right_command" default="/s1/right/command"/>
-
   <arg name="lsdb_serial_timeout_sec" default="0.5"/>
-
   <arg name="vehicle_calibration_param_path" default="$(find-pkg-share lsdb_interface)/config/vehicle_calibration.param.yaml"/>
 
-  <!-- Global parameters -->
-  <!-- Do not add "group" in order to propagate global parameters -->
-  <include file="$(find-pkg-share global_parameter_loader)/launch/global_params.launch.py">
-    <arg name="vehicle_model" value="crow"/>
-  </include>
+  <group if="$(eval &quot;'$(var mode)'=='can'&quot;)">
+    <group if="$(eval &quot;'$(var launch_can_bride)'=='true'&quot;)">
+      <push-ros-namespace namespace="$(var can_device)"/>
+      <include file="$(find-pkg-share ros2_socketcan)/launch/socket_can_bridge.launch.xml"/>
+    </group>
+    <include file="$(find-pkg-share dio_ros_driver)/launch/dio_ros_driver.launch.xml">
+      <arg name="config_file" value="$(find-pkg-share lsdb_interface)/config/dio_ros_driver.params.yaml"/>
+    </include>
+  </group>
 
   <group>
     <push-ros-namespace namespace="s1"/>
+
+    <!-- can interface -->
+    <group if="$(eval &quot;'$(var mode)'=='can'&quot;)">
+      <group>
+        <push-ros-namespace namespace="lsdb/left"/>
+        <include file="$(find-pkg-share lsdb_can_interface)/launch/lsdb_can_interface.launch.xml">
+          <arg name="input_can" value="/$(var can_device)/from_can_bus"/>
+          <arg name="output_can" value="/$(var can_device)/to_can_bus"/>
+          <arg name="input_command" value="$(var s1_left_command)"/>
+          <arg name="node_id" value="2"/>
+          <arg name="trapezoidal_accel" value="4.0"/>
+          <arg name="trapezoidal_decel" value="4.0"/>
+          <arg name="status_loop_rate_hz" value="10.0"/>
+        </include>
+      </group>
+
+      <group>
+        <push-ros-namespace namespace="lsdb/right"/>
+        <include file="$(find-pkg-share lsdb_can_interface)/launch/lsdb_can_interface.launch.xml">
+          <arg name="input_can" value="/$(var can_device)/from_can_bus"/>
+          <arg name="output_can" value="/$(var can_device)/to_can_bus"/>
+          <arg name="input_command" value="$(var s1_right_command)"/>
+          <arg name="node_id" value="1"/>
+          <arg name="trapezoidal_accel" value="4.0"/>
+          <arg name="trapezoidal_decel" value="4.0"/>
+          <arg name="status_loop_rate_hz" value="10.0"/>
+        </include>
+      </group>
+    </group>
+
 
     <!-- serial interface -->
     <group if="$(eval &quot;'$(var mode)'=='serial'&quot;)">

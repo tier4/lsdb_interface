@@ -25,6 +25,8 @@
 #include "autoware_auto_vehicle_msgs/msg/gear_report.hpp"
 #include "autoware_auto_vehicle_msgs/msg/hazard_lights_command.hpp"
 #include "autoware_auto_vehicle_msgs/msg/hazard_lights_report.hpp"
+#include "autoware_auto_vehicle_msgs/msg/headlights_command.hpp"
+#include "autoware_auto_vehicle_msgs/msg/headlights_report.hpp"
 #include "autoware_auto_vehicle_msgs/msg/steering_report.hpp"
 #include "autoware_auto_vehicle_msgs/msg/turn_indicators_command.hpp"
 #include "autoware_auto_vehicle_msgs/msg/turn_indicators_report.hpp"
@@ -70,6 +72,8 @@ private:
     const autoware_auto_vehicle_msgs::msg::TurnIndicatorsCommand::ConstSharedPtr msg);
   void onHazardLightsCmd(
     const autoware_auto_vehicle_msgs::msg::HazardLightsCommand::ConstSharedPtr msg);
+  void onHeadLightsCmd(
+    const autoware_auto_vehicle_msgs::msg::HeadlightsCommand::ConstSharedPtr msg);
   void onGearCmd(const autoware_auto_vehicle_msgs::msg::GearCommand::ConstSharedPtr msg);
   void onEmergencyCmd(const tier4_vehicle_msgs::msg::VehicleEmergencyStamped::ConstSharedPtr msg);
   void onLsdbRightStatus(const lsdb_msgs::msg::LsdbStatusStamped::ConstSharedPtr msg);
@@ -131,6 +135,8 @@ private:
     turn_indicators_cmd_sub_;
   rclcpp::Subscription<autoware_auto_vehicle_msgs::msg::HazardLightsCommand>::SharedPtr
     hazard_lights_cmd_sub_;
+  rclcpp::Subscription<autoware_auto_vehicle_msgs::msg::HeadlightsCommand>::SharedPtr
+    head_lights_cmd_sub_;
   rclcpp::Subscription<autoware_auto_vehicle_msgs::msg::GearCommand>::SharedPtr gear_cmd_sub_;
   rclcpp::Subscription<tier4_vehicle_msgs::msg::VehicleEmergencyStamped>::SharedPtr emergency_sub_;
   // Subscribe from lsdb
@@ -159,12 +165,11 @@ private:
   rclcpp::Publisher<tier4_debug_msgs::msg::Float32Stamped>::SharedPtr velocity_kmph_status_pub_;
   rclcpp::Publisher<tier4_debug_msgs::msg::Float32Stamped>::SharedPtr
     steering_wheel_deg_status_pub_;
-  rclcpp::Publisher<tier4_vehicle_msgs::msg::BatteryStatus>::SharedPtr battery_charge_status_pub_;
   // Publish to AVA-3510 Dout
   rclcpp::Publisher<dio_ros_driver::msg::DIOPort>::SharedPtr dout0_brake_light_pub_;
   rclcpp::Publisher<dio_ros_driver::msg::DIOPort>::SharedPtr dout1_front_light_pub_;
-  rclcpp::Publisher<dio_ros_driver::msg::DIOPort>::SharedPtr dout2_right_blinker_pub_;
-  rclcpp::Publisher<dio_ros_driver::msg::DIOPort>::SharedPtr dout3_left_blinker_pub_;
+  rclcpp::Publisher<dio_ros_driver::msg::DIOPort>::SharedPtr dout2_left_blinker_pub_;
+  rclcpp::Publisher<dio_ros_driver::msg::DIOPort>::SharedPtr dout3_right_blinker_pub_;
 };
 
 #endif  // LSDB_INTERFACE__LSDB_INTERFACE_HPP_
