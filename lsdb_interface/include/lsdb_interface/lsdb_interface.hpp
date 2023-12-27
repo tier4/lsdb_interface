@@ -168,8 +168,8 @@ private:
   // Publish to AVA-3510 Dout
   rclcpp::Publisher<dio_ros_driver::msg::DIOPort>::SharedPtr dout0_brake_light_pub_;
   rclcpp::Publisher<dio_ros_driver::msg::DIOPort>::SharedPtr dout1_front_light_pub_;
-  rclcpp::Publisher<dio_ros_driver::msg::DIOPort>::SharedPtr dout2_right_blinker_pub_;
-  rclcpp::Publisher<dio_ros_driver::msg::DIOPort>::SharedPtr dout3_left_blinker_pub_;
+  rclcpp::Publisher<dio_ros_driver::msg::DIOPort>::SharedPtr dout2_left_blinker_pub_;
+  rclcpp::Publisher<dio_ros_driver::msg::DIOPort>::SharedPtr dout3_right_blinker_pub_;
 };
 
 #endif  // LSDB_INTERFACE__LSDB_INTERFACE_HPP_

@@ -88,8 +88,8 @@ LsdbInterface::LsdbInterface(const rclcpp::NodeOptions & node_options)
   // Publish to AVA-3510 Dout
   dout0_brake_light_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout0", 1);
   dout1_front_light_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout1", 1);
-  dout2_right_blinker_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout2", 1);
-  dout3_left_blinker_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout3", 1);
+  dout2_left_blinker_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout2", 1);
+  dout3_right_blinker_pub_ = this->create_publisher<dio_ros_driver::msg::DIOPort>("/dio/dout3", 1);
 
   setupDiagnosticUpdater();
 
@@ -255,13 +255,13 @@ void LsdbInterface::onTurnIndicatorsCmd(                                        
         break;
       case TurnIndicatorsCommand::ENABLE_LEFT:
         turn_indicator_report_msg.report = TurnIndicatorsReport::ENABLE_LEFT;
-        dio2_msg.value = true;
-        dio3_msg.value = false;
+        dio2_msg.value = false;
+        dio3_msg.value = true;
         break;
       case TurnIndicatorsCommand::ENABLE_RIGHT:
         turn_indicator_report_msg.report = TurnIndicatorsReport::ENABLE_RIGHT;
-        dio2_msg.value = false;
-        dio3_msg.value = true;
+        dio2_msg.value = true;
+        dio3_msg.value = false;
         break;
       default:
         RCLCPP_ERROR_THROTTLE(
@@ -272,8 +272,8 @@ void LsdbInterface::onTurnIndicatorsCmd(                                        
 
   turn_indicators_status_pub_->publish(turn_indicator_report_msg);
   hazard_lights_status_pub_->publish(hazard_report_msg);
-  dout2_right_blinker_pub_->publish(dio2_msg);
-  dout3_left_blinker_pub_->publish(dio3_msg);
+  dout2_left_blinker_pub_->publish(dio2_msg);
+  dout3_right_blinker_pub_->publish(dio3_msg);
 }
 
 void LsdbInterface::onHazardLightsCmd(
