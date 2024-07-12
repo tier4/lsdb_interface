@@ -75,59 +75,51 @@ void LsdbCanInterface::lsdbInitialization(const uint32_t can_cmd_id, const bool 
     // TODO
     // break;
   case InitStatus::Setting_trapezoidal_accel:
-      if (can_cmd_id == spec_map[CommandID::eTrapezoidal_acceleration].can_cmd_id) {
-        if (is_write_success){
-          sendCommand(CommandID::eTrapezoidal_deceleration, trapezoidal_decel_, ComType::write);
-          initialize_status_ = InitStatus::Setting_trapezoidal_decel;
-        } else {
-          RCLCPP_ERROR_STREAM(this->get_logger(), "[lsdbInitialization] Write commnad failed: trapezoidal_accel");
-        }
+      if (can_cmd_id == spec_map[CommandID::eTrapezoidal_acceleration].can_cmd_id && is_write_success) {
+        sendCommand(CommandID::eTrapezoidal_deceleration, trapezoidal_decel_, ComType::write);
+        initialize_status_ = InitStatus::Setting_trapezoidal_decel;
+      } else {
+        RCLCPP_ERROR_STREAM(this->get_logger(), "[lsdbInitialization] Write commnad failed: trapezoidal_accel");
       }
       break;
   case InitStatus::Setting_trapezoidal_decel:
-      if (can_cmd_id == spec_map[CommandID::eTrapezoidal_deceleration].can_cmd_id) {
-        if (is_write_success){
-          sendCommand(CommandID::eAction_mode, (int8_t)0x03, ComType::write);
-          initialize_status_ = InitStatus::Setting_action_mode;
-        } else {
-          sendCommand(CommandID::eTrapezoidal_deceleration, trapezoidal_decel_, ComType::write);
-          RCLCPP_ERROR_STREAM(this->get_logger(), "[lsdbInitialization] Write commnad failed: trapezoidal_decel");
-        }
+      if (can_cmd_id == spec_map[CommandID::eTrapezoidal_deceleration].can_cmd_id && is_write_success) {
+        sendCommand(CommandID::eAction_mode, (int8_t)0x03, ComType::write);
+        initialize_status_ = InitStatus::Setting_action_mode;
+      } else {
+        sendCommand(CommandID::eTrapezoidal_deceleration, trapezoidal_decel_, ComType::write);
+        RCLCPP_ERROR_STREAM(this->get_logger(), "[lsdbInitialization] Write commnad failed: trapezoidal_decel");
       }
       break;
   case InitStatus::Setting_action_mode:
-      if (can_cmd_id == spec_map[CommandID::eAction_mode].can_cmd_id) {
-        if (is_write_success){
-          sendCommand(CommandID::eControl_word, (int16_t)0x0F, ComType::write);
-          initialize_status_ = InitStatus::Setting_motor_operation;
-        } else {
-          sendCommand(CommandID::eAction_mode, (int8_t)0x03, ComType::write);
-          RCLCPP_ERROR_STREAM(this->get_logger(), "[lsdbInitialization] Write commnad failed: action_mode");
-        }
+      if (can_cmd_id == spec_map[CommandID::eAction_mode].can_cmd_id && is_write_success) {
+        sendCommand(CommandID::eControl_word, (int16_t)0x0F, ComType::write);
+        initialize_status_ = InitStatus::Setting_motor_operation;
+      } else {
+        sendCommand(CommandID::eAction_mode, (int8_t)0x03, ComType::write);
+        RCLCPP_ERROR_STREAM(this->get_logger(), "[lsdbInitialization] Write commnad failed: action_mode");
       }
       break;
   case InitStatus::Setting_motor_operation:
-      if (can_cmd_id == spec_map[CommandID::eControl_word].can_cmd_id) {
-        if (is_write_success){
-          sendCommand(CommandID::eSimple_PDO_function, (int16_t)0x01, ComType::write);
-          initialize_status_ = InitStatus::Setting_pdo_function;
-        } else {
-          sendCommand(CommandID::eControl_word, (int8_t)0x03, ComType::write);
-          RCLCPP_ERROR_STREAM(this->get_logger(), "[lsdbInitialization] Write commnad failed: motor_operation");
-        }
+      if (can_cmd_id == spec_map[CommandID::eControl_word].can_cmd_id && is_write_success) {
+        sendCommand(CommandID::eSimple_PDO_function, (int16_t)0x01, ComType::write);
+        initialize_status_ = InitStatus::Setting_pdo_function;
+      } else {
+        sendCommand(CommandID::eControl_word, (int16_t)0x0F, ComType::write);
+        RCLCPP_ERROR_STREAM(this->get_logger(), "[lsdbInitialization] Write commnad failed: motor_operation");
       }
       break;
   case InitStatus::Setting_pdo_function:
-      if (can_cmd_id == spec_map[CommandID::eSimple_PDO_function].can_cmd_id) {
-        if (is_write_success){
-          initialize_status_ = InitStatus::End;
-        } else {
-          sendCommand(CommandID::eSimple_PDO_function, (int8_t)0x03, ComType::write);
-          RCLCPP_ERROR_STREAM(this->get_logger(), "[lsdbInitialization] Write commnad failed: pdo_function");
-        }
+      if (can_cmd_id == spec_map[CommandID::eSimple_PDO_function].can_cmd_id && is_write_success) {
+        initialize_status_ = InitStatus::End;
+        RCLCPP_INFO_STREAM(this->get_logger(), "[lsdbInitialization] Initialization finished.");
+      } else {
+        sendCommand(CommandID::eSimple_PDO_function, (int16_t)0x01, ComType::write);
+        RCLCPP_ERROR_STREAM(this->get_logger(), "[lsdbInitialization] Write commnad failed: pdo_function");
       }
-      // break;
+      break;
   case InitStatus::End:
+      RCLCPP_INFO_STREAM(this->get_logger(), "[lsdbInitialization] Initialization finished.");
       break;
   default:
       RCLCPP_ERROR_STREAM(this->get_logger(), "[lsdbInitialization] InitStatus Error.");
