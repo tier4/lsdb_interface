@@ -18,6 +18,7 @@
   <depend>message_filters</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
+  <depend>lsdb_can_interface</depend>
   <depend>lsdb_msgs</depend>
   <depend>lsdb_serial_interface</depend>
   <depend>sensor_msgs</depend>
