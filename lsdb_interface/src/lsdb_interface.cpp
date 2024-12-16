@@ -22,7 +22,7 @@ LsdbInterface::LsdbInterface(const rclcpp::NodeOptions & node_options)
   using std::placeholders::_1;
 
   // Parameters
-  const auto vehicle_info = vehicle_info_util::VehicleInfoUtil(*this).getVehicleInfo();
+  const auto vehicle_info = autoware::vehicle_info_utils::VehicleInfoUtils(*this).getVehicleInfo();
   wheel_base_ = vehicle_info.wheel_base_m;
   wheel_tread_ = vehicle_info.wheel_tread_m;
   wheel_radius_ = vehicle_info.wheel_radius_m;
@@ -32,23 +32,26 @@ LsdbInterface::LsdbInterface(const rclcpp::NodeOptions & node_options)
 
   // Subscribe from Autoware
   control_cmd_sub_ =
-    this->create_subscription<autoware_auto_control_msgs::msg::AckermannControlCommand>(
+    this->create_subscription<autoware_control_msgs::msg::Control>(
       "/control/command/control_cmd", 1,
       std::bind(&LsdbInterface::onAckermannControlCmd, this, _1));
-  gear_cmd_sub_ = this->create_subscription<autoware_auto_vehicle_msgs::msg::GearCommand>(
+  gear_cmd_sub_ = this->create_subscription<autoware_vehicle_msgs::msg::GearCommand>(
     "/control/command/gear_cmd", 1, std::bind(&LsdbInterface::onGearCmd, this, _1));
   turn_indicators_cmd_sub_ =
-    this->create_subscription<autoware_auto_vehicle_msgs::msg::TurnIndicatorsCommand>(
+    this->create_subscription<autoware_vehicle_msgs::msg::TurnIndicatorsCommand>(
       "/control/command/turn_indicators_cmd", 1,
       std::bind(&LsdbInterface::onTurnIndicatorsCmd, this, _1));
   hazard_lights_cmd_sub_ =
-    this->create_subscription<autoware_auto_vehicle_msgs::msg::HazardLightsCommand>(
+    this->create_subscription<autoware_vehicle_msgs::msg::HazardLightsCommand>(
       "/control/command/hazard_lights_cmd", 1,
       std::bind(&LsdbInterface::onHazardLightsCmd, this, _1));
+
+  // TODO: Replace with autoware_msgs after removing autoware_auto_msgs
   head_lights_cmd_sub_ =
     this->create_subscription<autoware_auto_vehicle_msgs::msg::HeadlightsCommand>(
       "/control/command/head_lights_cmd", 1,
       std::bind(&LsdbInterface::onHeadLightsCmd, this, _1));
+
   emergency_sub_ = create_subscription<tier4_vehicle_msgs::msg::VehicleEmergencyStamped>(
     "/control/command/emergency_cmd", 1, std::bind(&LsdbInterface::onEmergencyCmd, this, _1));
   // Subscribe from lsdb
@@ -61,20 +64,20 @@ LsdbInterface::LsdbInterface(const rclcpp::NodeOptions & node_options)
     "/dio/din0", 1, std::bind(&LsdbInterface::onDin0Estop, this, _1));
 
   // Publish to autoware
-  velocity_status_pub_ = this->create_publisher<autoware_auto_vehicle_msgs::msg::VelocityReport>(
+  velocity_status_pub_ = this->create_publisher<autoware_vehicle_msgs::msg::VelocityReport>(
     "/vehicle/status/velocity_status", 1);
-  steering_status_pub_ = this->create_publisher<autoware_auto_vehicle_msgs::msg::SteeringReport>(
+  steering_status_pub_ = this->create_publisher<autoware_vehicle_msgs::msg::SteeringReport>(
     "/vehicle/status/steering_status", 1);
-  gear_status_pub_ = this->create_publisher<autoware_auto_vehicle_msgs::msg::GearReport>(
+  gear_status_pub_ = this->create_publisher<autoware_vehicle_msgs::msg::GearReport>(
     "/vehicle/status/gear_status", 1);
   turn_indicators_status_pub_ =
-    this->create_publisher<autoware_auto_vehicle_msgs::msg::TurnIndicatorsReport>(
+    this->create_publisher<autoware_vehicle_msgs::msg::TurnIndicatorsReport>(
       "/vehicle/status/turn_indicators_status", 1);
   hazard_lights_status_pub_ =
-    this->create_publisher<autoware_auto_vehicle_msgs::msg::HazardLightsReport>(
+    this->create_publisher<autoware_vehicle_msgs::msg::HazardLightsReport>(
       "/vehicle/status/hazard_lights_status", 1);
   control_mode_status_pub_ =
-    this->create_publisher<autoware_auto_vehicle_msgs::msg::ControlModeReport>(
+    this->create_publisher<autoware_vehicle_msgs::msg::ControlModeReport>(
       "/vehicle/status/control_mode", 1);
   velocity_kmph_status_pub_ = this->create_publisher<tier4_debug_msgs::msg::Float32Stamped>(
     "/vehicle/status/velocity_kmph", 1);
@@ -142,9 +145,9 @@ void LsdbInterface::publishCommand()
 
 void LsdbInterface::publishVehicleControlMode()
 {
-  auto msg = autoware_auto_vehicle_msgs::msg::ControlModeReport{};
+  auto msg = autoware_vehicle_msgs::msg::ControlModeReport{};
   msg.stamp = this->now();
-  msg.mode = autoware_auto_vehicle_msgs::msg::ControlModeReport::AUTONOMOUS;
+  msg.mode = autoware_vehicle_msgs::msg::ControlModeReport::AUTONOMOUS;
   control_mode_status_pub_->publish(msg);
 }
 
@@ -155,7 +158,7 @@ void LsdbInterface::publishVelocityAndSteering(
   const double rpm_unit = 2 * wheel_radius_ * M_PI / 60.0;
 
   // calcVehicleTwist
-  autoware_auto_vehicle_msgs::msg::VelocityReport twist;
+  autoware_vehicle_msgs::msg::VelocityReport twist;
   twist.header.stamp = left_msg->stamp;
   twist.header.frame_id = "base_link";
   double left_wheel_vel = left_msg->status.motor_speed_rpm * rpm_unit * speed_scale_factor_;
@@ -173,7 +176,7 @@ void LsdbInterface::publishVelocityAndSteering(
   velocity_kmph_msg.stamp = this->now();
   velocity_kmph_status_pub_->publish(velocity_kmph_msg);
 
-  autoware_auto_vehicle_msgs::msg::SteeringReport steer_msg;
+  autoware_vehicle_msgs::msg::SteeringReport steer_msg;
   steer_msg.stamp = left_msg->stamp;
   steer_msg.steering_tire_angle =
     twist.longitudinal_velocity != 0.0
@@ -188,9 +191,9 @@ void LsdbInterface::publishVelocityAndSteering(
 }
 
 void LsdbInterface::onAckermannControlCmd(
-  const autoware_auto_control_msgs::msg::AckermannControlCommand::ConstSharedPtr msg)
+  const autoware_control_msgs::msg::Control::ConstSharedPtr msg)
 {
-  using autoware_auto_vehicle_msgs::msg::GearCommand;
+  using autoware_vehicle_msgs::msg::GearCommand;
 
   if (!gear_cmd_ptr_) {
     RCLCPP_WARN_STREAM(this->get_logger(), "gear command is not subscribed");
@@ -200,9 +203,9 @@ void LsdbInterface::onAckermannControlCmd(
   s1_right_cmd_.stamp = msg->stamp;
   s1_left_cmd_.stamp = msg->stamp;
 
-  double trans_vel = msg->longitudinal.speed;
+  double trans_vel = msg->longitudinal.velocity;
   double angular_vel =
-    msg->longitudinal.speed * std::tan(msg->lateral.steering_tire_angle) / wheel_base_;
+    msg->longitudinal.velocity * std::tan(msg->lateral.steering_tire_angle) / wheel_base_;
 
   double left_wheel_rpm = 0.0;
   double right_wheel_rpm = 0.0;
@@ -217,12 +220,12 @@ void LsdbInterface::onAckermannControlCmd(
 }
 
 void LsdbInterface::onTurnIndicatorsCmd(                                                 // Change to AVA-3510 DIO
-  const autoware_auto_vehicle_msgs::msg::TurnIndicatorsCommand::ConstSharedPtr msg)
+  const autoware_vehicle_msgs::msg::TurnIndicatorsCommand::ConstSharedPtr msg)
 {
-  using autoware_auto_vehicle_msgs::msg::HazardLightsCommand;
-  using autoware_auto_vehicle_msgs::msg::HazardLightsReport;
-  using autoware_auto_vehicle_msgs::msg::TurnIndicatorsCommand;
-  using autoware_auto_vehicle_msgs::msg::TurnIndicatorsReport;
+  using autoware_vehicle_msgs::msg::HazardLightsCommand;
+  using autoware_vehicle_msgs::msg::HazardLightsReport;
+  using autoware_vehicle_msgs::msg::TurnIndicatorsCommand;
+  using autoware_vehicle_msgs::msg::TurnIndicatorsReport;
 
   auto hazard_report_msg = HazardLightsReport{};
   hazard_report_msg.stamp = this->now();
@@ -277,12 +280,13 @@ void LsdbInterface::onTurnIndicatorsCmd(                                        
 }
 
 void LsdbInterface::onHazardLightsCmd(
-  const autoware_auto_vehicle_msgs::msg::HazardLightsCommand::ConstSharedPtr msg)
+  const autoware_vehicle_msgs::msg::HazardLightsCommand::ConstSharedPtr msg)
 {
   hazard_light_cmd_ptr_ = msg;
 }
 
 void LsdbInterface::onHeadLightsCmd(
+  // TODO: Replace with autoware_msgs after removing autoware_auto_msgs
   const autoware_auto_vehicle_msgs::msg::HeadlightsCommand::ConstSharedPtr msg)
 {
   dio_ros_driver::msg::DIOPort dout1_msg;
@@ -304,10 +308,10 @@ void LsdbInterface::onHeadLightsCmd(
 }
 
 void LsdbInterface::onGearCmd(
-  const autoware_auto_vehicle_msgs::msg::GearCommand::ConstSharedPtr msg)
+  const autoware_vehicle_msgs::msg::GearCommand::ConstSharedPtr msg)
 {
-  using autoware_auto_vehicle_msgs::msg::GearCommand;
-  using autoware_auto_vehicle_msgs::msg::GearReport;
+  using autoware_vehicle_msgs::msg::GearCommand;
+  using autoware_vehicle_msgs::msg::GearReport;
 
   gear_cmd_ptr_ = msg;
 
