@@ -82,7 +82,7 @@
     <!-- autoware interface -->
     <arg name="loop_rate" default="50.0"/>
     <arg name="control_cmd_timeout_sec" default="0.5"/>
-    <arg name="vehicle_velocity_limit" default="1.67" doc="velocity limit on vehicle interface, unit is [mps]. 1.67mps ≒ 6.0kmph"/>
+    <arg name="vehicle_velocity_limit" default="1.67"/> <!-- Velocity limit on vehicle interface, unit is [mps]. 1.67mps ≒ 6.0kmph -->
     <node pkg="lsdb_interface" name="lsdb_interface" exec="lsdb_interface" output="log">
       <param name="loop_rate" value="$(var loop_rate)"/>
       <param name="control_cmd_timeout_sec" value="$(var control_cmd_timeout_sec)"/>
