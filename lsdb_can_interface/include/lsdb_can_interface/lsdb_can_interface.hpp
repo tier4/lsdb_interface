@@ -37,6 +37,7 @@ private:
     Start,                      // 初期状態
     Setting_trapezoidal_accel,  // 台形加速度設定中
     Setting_trapezoidal_decel,  // 台形減速度設定中
+    Setting_max_rpm_limit,      // 上限RPM設定中
     Setting_action_mode,        // 動作モード設定中
     Setting_motor_operation,    // モーター動作設定中
     Setting_pdo_function,       // PDO function設定中
@@ -50,6 +51,7 @@ private:
   uint32_t pdo_fnc_can_id_;
   uint32_t trapezoidal_accel_;  // accel
   uint32_t trapezoidal_decel_;  // decel
+  uint16_t max_rpm_limit_;
 
   // Variable
   lsdb_msgs::msg::LsdbStatusStamped lsdb_status_;

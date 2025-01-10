@@ -53,6 +53,7 @@ private:
   double speed_scale_factor_;
   double loop_rate_;
   double control_cmd_timeout_sec_;
+  double vehicle_velocity_limit_;
   bool is_emergency_{false};
   rclcpp::Time prev_control_cmd_stamp_{0, 0, RCL_ROS_TIME};
   bool is_control_command_timeout_;

@@ -31,6 +31,7 @@ LsdbCanInterface::LsdbCanInterface(const rclcpp::NodeOptions & node_options)
   trapezoidal_accel_ = (uint32_t)(trapezoidal_accel * 256.0 * 4096.0 / 15625.0);
   trapezoidal_decel_ = (uint32_t)(trapezoidal_decel * 256.0 * 4096.0 / 15625.0);
 
+  max_rpm_limit_ = declare_parameter<int>("max_rpm_limit", 122);  // If wheel_diameter = 260, then 122rpm ≒ 6km/h
   const double status_loop_rate_hz = declare_parameter<double>("status_loop_rate_hz", 10.0);
 
   // Subscriber
@@ -84,11 +85,20 @@ void LsdbCanInterface::lsdbInitialization(const uint32_t can_cmd_id, const bool 
       break;
   case InitStatus::Setting_trapezoidal_decel:
       if (can_cmd_id == spec_map[CommandID::eTrapezoidal_deceleration].can_cmd_id && is_write_success) {
-        sendCommand(CommandID::eAction_mode, (int8_t)0x03, ComType::write);
-        initialize_status_ = InitStatus::Setting_action_mode;
+        sendCommand(CommandID::eMaximum_speed_limit_rpm, max_rpm_limit_, ComType::write);
+        initialize_status_ = InitStatus::Setting_max_rpm_limit;
       } else {
         sendCommand(CommandID::eTrapezoidal_deceleration, trapezoidal_decel_, ComType::write);
         RCLCPP_ERROR_STREAM(this->get_logger(), "[lsdbInitialization] Write commnad failed: trapezoidal_decel");
+      }
+      break;
+  case InitStatus::Setting_max_rpm_limit:
+      if (can_cmd_id == spec_map[CommandID::eMaximum_speed_limit_rpm].can_cmd_id && is_write_success) {
+        sendCommand(CommandID::eAction_mode, (int8_t)0x03, ComType::write);
+        initialize_status_ = InitStatus::Setting_action_mode;
+      } else {
+        sendCommand(CommandID::eMaximum_speed_limit_rpm, max_rpm_limit_, ComType::write);
+        RCLCPP_ERROR_STREAM(this->get_logger(), "[lsdbInitialization] Write commnad failed: max_rpm_limit");
       }
       break;
   case InitStatus::Setting_action_mode:

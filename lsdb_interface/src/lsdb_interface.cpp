@@ -29,6 +29,7 @@ LsdbInterface::LsdbInterface(const rclcpp::NodeOptions & node_options)
   speed_scale_factor_ = declare_parameter<double>("speed_scale_factor", 1.0);
   loop_rate_ = declare_parameter<double>("loop_rate", 50.0);
   control_cmd_timeout_sec_ = declare_parameter<double>("control_cmd_timeout_sec", 1.0);
+  vehicle_velocity_limit_ = declare_parameter<double>("vehicle_velocity_limit", 1.67);
 
   // Subscribe from Autoware
   control_cmd_sub_ =
@@ -201,8 +202,12 @@ void LsdbInterface::onAckermannControlCmd(
   s1_left_cmd_.stamp = msg->stamp;
 
   double trans_vel = msg->longitudinal.speed;
-  double angular_vel =
-    msg->longitudinal.speed * std::tan(msg->lateral.steering_tire_angle) / wheel_base_;
+  if (trans_vel > vehicle_velocity_limit_) {
+    trans_vel = vehicle_velocity_limit_;
+    RCLCPP_ERROR_THROTTLE(
+          this->get_logger(), *get_clock(), 1000, "error: input command over the limit velocity(%f[m/s]), limit to %f[m/s]", msg->longitudinal.speed, vehicle_velocity_limit_);
+  }
+  double angular_vel = trans_vel * std::tan(msg->lateral.steering_tire_angle) / wheel_base_;
 
   double left_wheel_rpm = 0.0;
   double right_wheel_rpm = 0.0;
