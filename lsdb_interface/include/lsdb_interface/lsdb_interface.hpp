@@ -93,6 +93,7 @@ private:
 
   // Diagnostics
   void setupDiagnosticUpdater();
+  void checkControlCommand(diagnostic_updater::DiagnosticStatusWrapper & stat);
   void checkDriverErrCode(const int bit_number, diagnostic_updater::DiagnosticStatusWrapper & stat);
   void checkInternalErr(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(0, stat);};
   void checkEncoderABZSignalErr(diagnostic_updater::DiagnosticStatusWrapper & stat){checkDriverErrCode(1, stat);};
