@@ -17,20 +17,24 @@
 
 #include "diagnostic_updater/diagnostic_updater.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "vehicle_info_util/vehicle_info_util.hpp"
+#include "autoware_vehicle_info_utils/vehicle_info_utils.hpp"
 
-#include "autoware_auto_control_msgs/msg/ackermann_control_command.hpp"
-#include "autoware_auto_vehicle_msgs/msg/control_mode_report.hpp"
-#include "autoware_auto_vehicle_msgs/msg/gear_command.hpp"
-#include "autoware_auto_vehicle_msgs/msg/gear_report.hpp"
-#include "autoware_auto_vehicle_msgs/msg/hazard_lights_command.hpp"
-#include "autoware_auto_vehicle_msgs/msg/hazard_lights_report.hpp"
+//#include "autoware_control_msgs/msg/ackermann_control_command.hpp"
+#include "autoware_control_msgs/msg/control.hpp"
+#include "autoware_vehicle_msgs/msg/control_mode_report.hpp"
+#include "autoware_vehicle_msgs/msg/gear_command.hpp"
+#include "autoware_vehicle_msgs/msg/gear_report.hpp"
+#include "autoware_vehicle_msgs/msg/hazard_lights_command.hpp"
+#include "autoware_vehicle_msgs/msg/hazard_lights_report.hpp"
+
+// TODO: Replace with autoware_msgs after removing autoware_auto_msgs
 #include "autoware_auto_vehicle_msgs/msg/headlights_command.hpp"
 #include "autoware_auto_vehicle_msgs/msg/headlights_report.hpp"
-#include "autoware_auto_vehicle_msgs/msg/steering_report.hpp"
-#include "autoware_auto_vehicle_msgs/msg/turn_indicators_command.hpp"
-#include "autoware_auto_vehicle_msgs/msg/turn_indicators_report.hpp"
-#include "autoware_auto_vehicle_msgs/msg/velocity_report.hpp"
+
+#include "autoware_vehicle_msgs/msg/steering_report.hpp"
+#include "autoware_vehicle_msgs/msg/turn_indicators_command.hpp"
+#include "autoware_vehicle_msgs/msg/turn_indicators_report.hpp"
+#include "autoware_vehicle_msgs/msg/velocity_report.hpp"
 #include "dio_ros_driver/msg/dio_port.hpp"
 #include "geometry_msgs/msg/twist_stamped.hpp"
 #include "lsdb_msgs/msg/lsdb_status_stamped.hpp"
@@ -62,20 +66,23 @@ private:
   lsdb_msgs::msg::LsdbCommandStamped s1_right_cmd_, s1_left_cmd_;
   lsdb_msgs::msg::LsdbStatusStamped::ConstSharedPtr lsdb_right_status_ptr_,
     lsdb_left_status_ptr_;
-  autoware_auto_vehicle_msgs::msg::GearCommand::ConstSharedPtr gear_cmd_ptr_;
-  autoware_auto_vehicle_msgs::msg::HazardLightsCommand::ConstSharedPtr hazard_light_cmd_ptr_;
+  autoware_vehicle_msgs::msg::GearCommand::ConstSharedPtr gear_cmd_ptr_;
+  autoware_vehicle_msgs::msg::HazardLightsCommand::ConstSharedPtr hazard_light_cmd_ptr_;
   rclcpp::TimerBase::SharedPtr cmd_timer_;
   dio_ros_driver::msg::DIOPort dout1_msg_;
 
   void onAckermannControlCmd(
-    const autoware_auto_control_msgs::msg::AckermannControlCommand::ConstSharedPtr msg);
+    const autoware_control_msgs::msg::Control::ConstSharedPtr msg);
   void onTurnIndicatorsCmd(
-    const autoware_auto_vehicle_msgs::msg::TurnIndicatorsCommand::ConstSharedPtr msg);
+    const autoware_vehicle_msgs::msg::TurnIndicatorsCommand::ConstSharedPtr msg);
   void onHazardLightsCmd(
-    const autoware_auto_vehicle_msgs::msg::HazardLightsCommand::ConstSharedPtr msg);
+    const autoware_vehicle_msgs::msg::HazardLightsCommand::ConstSharedPtr msg);
+
+  // TODO: Replace with autoware_msgs after removing autoware_auto_msgs
   void onHeadLightsCmd(
     const autoware_auto_vehicle_msgs::msg::HeadlightsCommand::ConstSharedPtr msg);
-  void onGearCmd(const autoware_auto_vehicle_msgs::msg::GearCommand::ConstSharedPtr msg);
+
+  void onGearCmd(const autoware_vehicle_msgs::msg::GearCommand::ConstSharedPtr msg);
   void onEmergencyCmd(const tier4_vehicle_msgs::msg::VehicleEmergencyStamped::ConstSharedPtr msg);
   void onLsdbRightStatus(const lsdb_msgs::msg::LsdbStatusStamped::ConstSharedPtr msg);
   void onLsdbLeftStatus(const lsdb_msgs::msg::LsdbStatusStamped::ConstSharedPtr msg);
@@ -131,15 +138,18 @@ private:
   };
 
   // Subscribe from Autoware
-  rclcpp::Subscription<autoware_auto_control_msgs::msg::AckermannControlCommand>::SharedPtr
+  rclcpp::Subscription<autoware_control_msgs::msg::Control>::SharedPtr
     control_cmd_sub_;
-  rclcpp::Subscription<autoware_auto_vehicle_msgs::msg::TurnIndicatorsCommand>::SharedPtr
+  rclcpp::Subscription<autoware_vehicle_msgs::msg::TurnIndicatorsCommand>::SharedPtr
     turn_indicators_cmd_sub_;
-  rclcpp::Subscription<autoware_auto_vehicle_msgs::msg::HazardLightsCommand>::SharedPtr
+  rclcpp::Subscription<autoware_vehicle_msgs::msg::HazardLightsCommand>::SharedPtr
     hazard_lights_cmd_sub_;
+
+  // TODO: Integrate into autoware_msgs
   rclcpp::Subscription<autoware_auto_vehicle_msgs::msg::HeadlightsCommand>::SharedPtr
     head_lights_cmd_sub_;
-  rclcpp::Subscription<autoware_auto_vehicle_msgs::msg::GearCommand>::SharedPtr gear_cmd_sub_;
+
+  rclcpp::Subscription<autoware_vehicle_msgs::msg::GearCommand>::SharedPtr gear_cmd_sub_;
   rclcpp::Subscription<tier4_vehicle_msgs::msg::VehicleEmergencyStamped>::SharedPtr emergency_sub_;
   // Subscribe from lsdb
   rclcpp::Subscription<lsdb_msgs::msg::LsdbStatusStamped>::SharedPtr lsdb_left_status_sub_;
@@ -153,16 +163,16 @@ private:
   rclcpp::Publisher<lsdb_msgs::msg::LsdbCommandStamped>::SharedPtr s1_cmd_right_pub_;
   rclcpp::Publisher<lsdb_msgs::msg::LsdbCommandStamped>::SharedPtr s1_cmd_left_pub_;
   // Publish to Autoware
-  rclcpp::Publisher<autoware_auto_vehicle_msgs::msg::VelocityReport>::SharedPtr
+  rclcpp::Publisher<autoware_vehicle_msgs::msg::VelocityReport>::SharedPtr
     velocity_status_pub_;
-  rclcpp::Publisher<autoware_auto_vehicle_msgs::msg::SteeringReport>::SharedPtr
+  rclcpp::Publisher<autoware_vehicle_msgs::msg::SteeringReport>::SharedPtr
     steering_status_pub_;
-  rclcpp::Publisher<autoware_auto_vehicle_msgs::msg::GearReport>::SharedPtr gear_status_pub_;
-  rclcpp::Publisher<autoware_auto_vehicle_msgs::msg::TurnIndicatorsReport>::SharedPtr
+  rclcpp::Publisher<autoware_vehicle_msgs::msg::GearReport>::SharedPtr gear_status_pub_;
+  rclcpp::Publisher<autoware_vehicle_msgs::msg::TurnIndicatorsReport>::SharedPtr
     turn_indicators_status_pub_;
-  rclcpp::Publisher<autoware_auto_vehicle_msgs::msg::HazardLightsReport>::SharedPtr
+  rclcpp::Publisher<autoware_vehicle_msgs::msg::HazardLightsReport>::SharedPtr
     hazard_lights_status_pub_;
-  rclcpp::Publisher<autoware_auto_vehicle_msgs::msg::ControlModeReport>::SharedPtr
+  rclcpp::Publisher<autoware_vehicle_msgs::msg::ControlModeReport>::SharedPtr
     control_mode_status_pub_;
   rclcpp::Publisher<tier4_debug_msgs::msg::Float32Stamped>::SharedPtr velocity_kmph_status_pub_;
   rclcpp::Publisher<tier4_debug_msgs::msg::Float32Stamped>::SharedPtr
