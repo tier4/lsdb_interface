@@ -19,6 +19,7 @@
 void LsdbInterface::setupDiagnosticUpdater()
 {
   diagnostic_updater_.setHardwareID("LSDB Motor Driver");
+  diagnostic_updater_.add("control_command_timeout", this, &LsdbInterface::checkControlCommand);
   diagnostic_updater_.add("Internal error", this, &LsdbInterface::checkInternalErr);
   diagnostic_updater_.add("Encoder ABZ signal error", this, &LsdbInterface::checkEncoderABZSignalErr);
   diagnostic_updater_.add("Encoder UVW signal error", this, &LsdbInterface::checkEncoderUVWSignalErr);
@@ -34,6 +35,25 @@ void LsdbInterface::setupDiagnosticUpdater()
   diagnostic_updater_.add("Motor temperature too high", this, &LsdbInterface::checkMotorTempHigh);
   diagnostic_updater_.add("Searching motor failed(Communication encoder)", this, &LsdbInterface::checkSearchingMotorFailed);
   diagnostic_updater_.add("Communication failed", this, &LsdbInterface::checkCommunicationFailed);
+}
+
+void LsdbInterface::checkControlCommand(diagnostic_updater::DiagnosticStatusWrapper & stat)
+{
+  using diagnostic_msgs::msg::DiagnosticStatus;
+
+  const auto dt = (this->now() - prev_control_cmd_stamp_).seconds();
+  is_control_command_timeout_ = dt > control_cmd_timeout_sec_;
+
+  if (is_control_command_timeout_) {
+    std::string error_msg = "control_cmd msg is timeout";
+    RCLCPP_ERROR_THROTTLE(
+      this->get_logger(), *this->get_clock(), 5000 /* ms */, "%s", error_msg.c_str());
+    stat.summary(DiagnosticStatus::ERROR, error_msg);
+    return;
+  }
+
+  stat.addf("control_cmd msg received delta time", "%lf", dt);
+  stat.summary(DiagnosticStatus::OK, "OK");
 }
 
 void LsdbInterface::checkDriverErrCode(const int bit_number, diagnostic_updater::DiagnosticStatusWrapper & stat)
