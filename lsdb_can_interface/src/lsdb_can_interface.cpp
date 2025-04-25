@@ -63,6 +63,7 @@ void LsdbCanInterface::onTimer()
   // send READ status commands
   sendCommand(CommandID::eControl_word, (int16_t)0x00, ComType::read);
   sendCommand(CommandID::eDrive_error_status_word_1, (uint16_t)0x00, ComType::read);
+  sendCommand(CommandID::eActual_temperature_of_the_drive, (uint8_t)0x00, ComType::read);
   sendCommand(CommandID::eEmergency_stop_order, (uint8_t)0x00, ComType::read);
 }
 
@@ -271,6 +272,8 @@ void LsdbCanInterface::onCanMsg(const can_msgs::msg::Frame::ConstSharedPtr msg)
       }
       err_bit <<= 1;
     }
+  } else if (can_cmd_id == spec_map[CommandID::eActual_temperature_of_the_drive].can_cmd_id) {
+    transLsdbData(read_size_byte, msg->data, &lsdb_status_.status.driver_temperature);
   }
 }
 
